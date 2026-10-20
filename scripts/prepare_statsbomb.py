@@ -295,9 +295,10 @@ def z_contato(e):
     return 0.0
 
 
-VEL_BOLA_LIMITE = 40.0  # m/s: par de keyframes da bola mais rapido que isso e ajustado localmente
-EMPRESTIMO_MAX = 0.3    # s: tempo emprestado de cada vizinho para resolver um par rapido demais
-TOL_EVENTO_S = 0.05     # s: a bola esta no local de cada evento com bola nesse instante (+- TOL)
+VEL_BOLA_LIMITE = 45.0  # m/s: limite da bola no teste; par de ancoras acima disso fica como conflito do dado
+VEL_BOLA_ENCAD = 35.0   # m/s: velocidade da bola entre duas ancoras consecutivas (acima, separa no tempo)
+VEL_JOG_ENCAD = 11.5    # m/s: velocidade do mesmo jogador entre dois eventos seus (acima, separa no tempo)
+AJUSTE_MAX_S = 0.03     # s: ajuste maximo de um toque para levar o par ao limite de 45 m/s (E tolera 1,0 m)
 TIPOS_BOLA = ("Pass", "Carry", "Shot", "Dribble", "Ball Receipt*", "Interception", "Ball Recovery", "Clearance")
 
 
@@ -377,26 +378,131 @@ def _recebimento_do_passe(ordenados, idx_passe, recipiente_id, t_passe):
     return None
 
 
+def _dist3(a, b):
+    return math.sqrt((a["x"] - b["x"]) ** 2 + (a["y"] - b["y"]) ** 2 + (a["z"] - b["z"]) ** 2)
+
+
+def _separar_no_tempo(ancs):
+    """Separa no tempo as ancoras que chegam rapido demais. Ancora consecutiva a, b: a bola precisa de
+    d/VEL_BOLA_ENCAD; se for o mesmo jogador (eventos dele, nos dois locais), o jogador precisa de
+    d/VEL_JOG_ENCAD. A ancora que pode anda para tras (ou a seguinte, para frente), sem passar da vizinha.
+    Ancoras protegidas (chute do gol) nao se movem. Devolve (n_deslocadas, deslocamento_maximo, pares_nao_resolvidos)."""
+    deslocadas, max_shift = set(), 0.0
+    for _ in range(400):
+        ancs.sort(key=lambda a: (a["t"], a["ordem"]))
+        mudou = False
+        for i in range(1, len(ancs)):
+            a, b = ancs[i - 1], ancs[i]
+            req = _dist3(a, b) / VEL_BOLA_ENCAD
+            if a["pid"] is not None and a["pid"] == b["pid"]:
+                req = max(req, math.dist((a["x"], a["y"]), (b["x"], b["y"])) / VEL_JOG_ENCAD)
+            dt = b["t"] - a["t"]
+            if dt >= req - 1e-9:
+                continue
+            falta = req - dt + 0.005
+            prev_t = ancs[i - 2]["t"] if i >= 2 else -1e9
+            prox_t = ancs[i + 1]["t"] if i + 1 < len(ancs) else 1e9
+            if not a["protegido"] and a["t"] - falta > prev_t + 0.02:
+                a["t"] -= falta
+                deslocadas.add(a["eid"])
+                max_shift = max(max_shift, falta)
+                mudou = True
+            elif not b["protegido"] and b["t"] + falta < prox_t - 0.02:
+                b["t"] += falta
+                deslocadas.add(b["eid"])
+                max_shift = max(max_shift, falta)
+                mudou = True
+            elif not a["protegido"] and a["t"] - (prev_t + 0.02) > 1e-6:
+                folga = a["t"] - (prev_t + 0.02)
+                a["t"] -= folga
+                deslocadas.add(a["eid"])
+                max_shift = max(max_shift, folga)
+                mudou = True
+        if not mudou:
+            break
+    # Ajuste minimo: par acima de VEL_BOLA_LIMITE que o alvo de 35 m/s nao alcancou (ex.: passe curto na fonte).
+    # Move o toque inteiro (ancoras no mesmo local e instante) no maximo AJUSTE_MAX_S, dentro da tolerancia
+    # de 1,0 m do teste (E). Ancora protegida nao se move.
+    for _ in range(60):
+        ancs.sort(key=lambda a: (a["t"], a["ordem"]))
+        alterou = False
+        for i in range(1, len(ancs)):
+            a, b = ancs[i - 1], ancs[i]
+            dt = b["t"] - a["t"]
+            d = _dist3(a, b)
+            if dt <= 1e-9 or d <= 0.3 or d / dt <= VEL_BOLA_LIMITE:
+                continue
+            falta = d / VEL_BOLA_LIMITE - dt + 0.002
+            if falta > AJUSTE_MAX_S:
+                continue
+            g0, g1 = _toque(ancs, i - 1)
+            if all(not x["protegido"] for x in ancs[g0:g1 + 1]) and (
+                    g0 == 0 or ancs[g0]["t"] - falta > ancs[g0 - 1]["t"] + 0.02):
+                for x in ancs[g0:g1 + 1]:
+                    x["t"] -= falta
+                    deslocadas.add(x["eid"])
+            else:
+                h0, h1 = _toque(ancs, i)
+                if not all(not x["protegido"] for x in ancs[h0:h1 + 1]):
+                    continue
+                if h1 + 1 < len(ancs) and ancs[h1]["t"] + falta >= ancs[h1 + 1]["t"] - 0.02:
+                    continue
+                for x in ancs[h0:h1 + 1]:
+                    x["t"] += falta
+                    deslocadas.add(x["eid"])
+            max_shift = max(max_shift, falta)
+            alterou = True
+            break
+        if not alterou:
+            break
+    ancs.sort(key=lambda a: (a["t"], a["ordem"]))
+    nao_resolvidos, residuais = [], []
+    for i in range(1, len(ancs)):
+        a, b = ancs[i - 1], ancs[i]
+        dt = b["t"] - a["t"]
+        v = _dist3(a, b) / dt if dt > 1e-9 else float("inf")
+        if v > VEL_BOLA_LIMITE:
+            nao_resolvidos.append({"t": round(a["t"], 3), "v": round(v, 1), "eventos": [a["eid"], b["eid"]]})
+        elif v > VEL_BOLA_ENCAD and _dist3(a, b) > 0.3:
+            residuais.append({"t": round(a["t"], 3), "v": round(v, 1), "eventos": [a["eid"], b["eid"]]})
+    return len(deslocadas), max_shift, nao_resolvidos, deslocadas, residuais
+
+
+def _toque(ancs, i):
+    """Intervalo (g0, g1) das ancoras que sao o mesmo toque de ancs[i]: mesmo local (< 0,3 m) e instante (< 0,05 s)."""
+    ref = ancs[i]
+    g0 = g1 = i
+    while g0 > 0 and abs(ancs[g0 - 1]["t"] - ref["t"]) <= 0.05 and _dist3(ancs[g0 - 1], ref) < 0.3:
+        g0 -= 1
+    while g1 + 1 < len(ancs) and abs(ancs[g1 + 1]["t"] - ref["t"]) <= 0.05 and _dist3(ancs[g1 + 1], ref) < 0.3:
+        g1 += 1
+    return g0, g1
+
+
 def cadeia_bola(eventos, gol, gol_team, desde):
     """Cadeia da bola ancorada nos eventos com bola. Devolve (keyframes [t, x, y, z], t_b, fim_gol, relatorio).
 
-    Regra: a bola esta no local de cada evento com bola no instante do evento (TOL_EVENTO_S).
-    - Passe: do inicio ao recebimento (Ball Receipt do recebedor, no local do recebimento); sem recebimento,
-      ate o fim do passe (inicio + duration). Nos passes com recebimento, a bola desacelera nos ultimos 0,25 s.
-    - Conducao (Carry), chute (Shot): inicio e fim nos locais e instantes do evento.
+    Regra: a bola esta no local de cada evento com bola no instante do evento; eventos com bola sao ancoras.
+    - Passe com recebimento: do inicio ao recebimento (local do Ball Receipt, instante do recebimento). Passe sem
+      recebimento: do inicio ao fim (inicio + duration). A bola desacelera nos ultimos 20% da duracao do passe,
+      sempre sobre a linha do passe (avanco monotono; nenhuma volta).
+    - Conducao (Carry) e chute (Shot): inicio e fim nos locais e instantes do evento.
     - Drible, recebimento sem passe ligado, desarme, interceptacao, corte: ponto no local do evento.
-    Pares de keyframes acima de VEL_BOLA_LIMITE sao ajustados localmente: a bola pode emprestar ate
-    EMPRESTIMO_MAX s do intervalo anterior ou do posterior, sem mexer nos eventos seguintes. Se ainda nao
-    couber, o par fica como conflito do dado (relatorio). O chute do gol nao e movido (t_b = instante do chute).
+    - Eventos no mesmo instante em locais distantes sao separados no tempo pela distancia (VEL_BOLA_ENCAD para a
+      bola; VEL_JOG_ENCAD quando e o mesmo jogador). Pontos equivalentes (< 0,3 m no mesmo instante) sao um so.
+    O chute do gol nao se move (t_b = instante do chute).
     """
     ordenados = sorted(eventos, key=lambda ev: ev["index"])
-    keys = []  # dicts: t, p (x, y), z, eid, ancora, protegido
+    ancs = []  # ancoras: dicts t, x, y, z, eid, pid, protegido, gol, ordem
+    segs = []  # (ancora_inicio, ancora_fim, intermediarios [(frac_tempo, frac_distancia, z)])
     usados = set()  # ids de Ball Receipt ja usados como fim de passe
     t_gol_fim = None
 
-    def K(t, p, z, e, ancora=True, protegido=False):
-        return {"t": t, "x": p[0], "y": p[1], "z": z, "eid": e["id"], "ancora": ancora, "protegido": protegido,
-                "gol": e is gol}
+    def A(t, p, z, e, pid, protegido=False):
+        a = {"t": t, "x": p[0], "y": p[1], "z": z, "eid": e["id"], "pid": pid, "protegido": protegido,
+             "gol": e is gol, "ordem": len(ancs)}
+        ancs.append(a)
+        return a
 
     for e in ordenados:
         if e["index"] > gol["index"]:
@@ -410,6 +516,7 @@ def cadeia_bola(eventos, gol, gol_team, desde):
         esp = e["team"]["id"] != gol_team
         t0 = tempo(e)
         p0 = campo_m(loc[0], loc[1], esp)
+        pid_e = str(e["player"]["id"]) if e.get("player") else None
         if typ == "Pass":
             fimloc = e["pass"].get("end_location") or loc
             p1 = campo_m(fimloc[0], fimloc[1], esp)
@@ -420,27 +527,31 @@ def cadeia_bola(eventos, gol, gol_team, desde):
                 t1 = tempo(rec)
                 p1 = campo_m(rec["location"][0], rec["location"][1], esp)
                 usados.add(rec["id"])
+                pid_fim = str(rec["player"]["id"]) if rec.get("player") else None
+                eid_fim = rec
             else:
                 t1 = t0 + float(e.get("duration") or 0.0)
+                pid_fim = None
+                eid_fim = e
             if t1 < t0 + 0.1:
                 t1 = t0 + 0.1
             d = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
             zpico = {"Low Pass": 1.0, "High Pass": min(0.22 * d, 14.0)}.get(altura, 0.0)
-            tm = (t0 + t1) / 2
-            pm = ((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2)
-            keys.append(K(t0, p0, 0.0, e))
-            keys.append(K(tm, pm, zpico, e, ancora=False))
-            keys.append(K(t1, p1, 0.0, e))
-            if rec is not None and d > 2.0 and (t1 - t0) > 0.35:
-                f_ = min(2.0, 0.1 * d) / d
-                q = (p1[0] + (p0[0] - p1[0]) * f_, p1[1] + (p0[1] - p1[1]) * f_)
-                keys.append(K(t1 - 0.25, q, 0.0, e, ancora=False))
+            a_ini = A(t0, p0, 0.0, e, pid_e)
+            a_fim = A(t1, p1, 0.0, eid_fim, pid_fim)
+            if rec is not None and d > 2.0:
+                s_dec = 1.0 - min(2.0, 0.1 * d) / d  # ultimos 2 m (ou 10%) sao percorridos devagar
+                inter = [(0.5, 0.625 * s_dec, zpico), (0.8, s_dec, 0.0)]  # 0,8 da duracao: desaceleracao
+            else:
+                inter = [(0.5, 0.5, zpico)]
+            segs.append((a_ini, a_fim, inter))
         elif typ == "Carry":
             fimloc = e["carry"].get("end_location") or loc
             p1 = campo_m(fimloc[0], fimloc[1], esp)
             t1 = t0 + max(float(e.get("duration") or 0.0), 0.05)
-            keys.append(K(t0, p0, 0.0, e))
-            keys.append(K(t1, p1, 0.0, e))
+            a_ini = A(t0, p0, 0.0, e, pid_e)
+            a_fim = A(t1, p1, 0.0, e, pid_e)
+            segs.append((a_ini, a_fim, []))
         elif typ == "Shot":
             fimloc = e["shot"].get("end_location") or loc
             p1 = campo_m(fimloc[0], fimloc[1], esp)
@@ -453,95 +564,49 @@ def cadeia_bola(eventos, gol, gol_team, desde):
             dur = max(dur, 0.05)
             z0 = z_contato(e)
             z1 = fimloc[2] * YARD if len(fimloc) > 2 else 0.0
-            keys.append(K(t0, p0, z0, e, protegido=(e is gol)))
-            keys.append(K(t0 + dur, p1, z1, e))
+            a_ini = A(t0, p0, z0, e, pid_e, protegido=(e is gol))
+            a_fim = A(t0 + dur, p1, z1, e, None)
+            segs.append((a_ini, a_fim, []))
             if e is gol:
                 t_gol_fim = t0 + dur
         else:  # Dribble, Ball Receipt* sem passe ligado, desarme
             if typ == "Ball Receipt*" and e["id"] in usados:
                 continue
-            keys.append(K(t0, p0, 0.0, e))
+            A(t0, p0, 0.0, e, pid_e)
 
-    keys.sort(key=lambda k: (k["t"], 0 if k["ancora"] else 1))
+    n_desl, max_desl, nao_res, desl_eids, residuais = _separar_no_tempo(ancs)
+
+    # keyframes: ancoras + intermediarios dos segmentos (posicao e tempo a partir das ancoras, ja separadas)
+    keys = [dict(a) for a in ancs]
+    for a_ini, a_fim, inter in segs:
+        for tf, df, z in inter:
+            t = a_ini["t"] + tf * (a_fim["t"] - a_ini["t"])
+            x = a_ini["x"] + (a_fim["x"] - a_ini["x"]) * df
+            y = a_ini["y"] + (a_fim["y"] - a_ini["y"]) * df
+            keys.append({"t": t, "x": x, "y": y, "z": z, "eid": a_ini["eid"], "pid": None, "protegido": False,
+                         "gol": False, "ordem": 10 ** 6})
+    keys.sort(key=lambda k: (k["t"], k["ordem"]))
     out = []
-    mesmo_instante = []  # eventos com bola no mesmo instante e lugares distantes: so um pode estar na bola
     for k in keys:
-        if out and abs(k["t"] - out[-1]["t"]) < 1e-6 and math.hypot(k["x"] - out[-1]["x"], k["y"] - out[-1]["y"]) < 0.5:
-            if k["protegido"]:  # o chute do gol fica, mesmo que outro evento caia no mesmo instante e lugar
-                out[-1] = k
-            continue  # mesmo instante e mesmo lugar: um keyframe so
-        if out and abs(k["t"] - out[-1]["t"]) < 1e-6:
+        if out and abs(k["t"] - out[-1]["t"]) < 1e-6 and math.hypot(k["x"] - out[-1]["x"], k["y"] - out[-1]["y"]) < 0.3:
             if k["protegido"]:
-                mesmo_instante.append(out[-1]["eid"])
                 out[-1] = k
-            else:
-                mesmo_instante.append(k["eid"])  # fica o primeiro na ordem do StatsBomb; o outro e registrado
-            continue
-        if out and k["t"] < out[-1]["t"] + 0.02:
-            k["t"] = out[-1]["t"] + 0.02  # dois eventos quase simultaneos: separa em 20 ms
-            k["ajustado"] = True
+            continue  # mesmo toque: um ponto so
         out.append(k)
-    keys = out
-
-    def vel(a, b):
-        dt = b["t"] - a["t"]
-        if dt <= 1e-9:
-            return float("inf")
-        return math.dist((a["x"], a["y"], a["z"]), (b["x"], b["y"], b["z"])) / dt
-
-    def com_t(k, t):
-        c = dict(k)
-        c["t"] = t
-        return c
-
-    ajustes, conflitos = [], []
-    i = 1
-    while i < len(keys):
-        a, b = keys[i - 1], keys[i]
-        if vel(a, b) <= VEL_BOLA_LIMITE:
-            i += 1
-            continue
-        resolvido = False
-        if i - 2 >= 0 and not a["protegido"]:  # empresta do intervalo anterior: o keyframe a vem mais cedo
-            passo = 0.01
-            while passo <= EMPRESTIMO_MAX + 1e-9 and not resolvido:
-                na = com_t(a, a["t"] - passo)
-                if na["t"] <= keys[i - 2]["t"] + 0.02:
-                    break
-                if vel(keys[i - 2], na) <= VEL_BOLA_LIMITE and vel(na, b) <= VEL_BOLA_LIMITE:
-                    ajustes.append((a["eid"], round(a["t"] - passo, 2), round(-passo, 2)))
-                    a["t"] = na["t"]
-                    resolvido = True
-                passo += 0.01
-        if not resolvido and i + 1 < len(keys) and not b["protegido"]:  # empresta do posterior: b vem mais tarde
-            passo = 0.01
-            while passo <= EMPRESTIMO_MAX + 1e-9 and not resolvido:
-                nb = com_t(b, b["t"] + passo)
-                if nb["t"] >= keys[i + 1]["t"] - 0.02:
-                    break
-                if vel(a, nb) <= VEL_BOLA_LIMITE and vel(nb, keys[i + 1]) <= VEL_BOLA_LIMITE:
-                    ajustes.append((b["eid"], round(b["t"] + passo, 2), round(passo, 2)))
-                    b["t"] = nb["t"]
-                    resolvido = True
-                passo += 0.01
-        if resolvido:
-            continue  # reavalia o mesmo par com o tempo novo
-        conflitos.append({"t": round(a["t"], 2), "v": round(vel(a, b), 1), "eventos": [a["eid"], b["eid"]]})
-        i += 1
-
     bk = []
-    for k in keys:
+    for k in out:
         t = k["t"]
         if bk and t <= bk[-1][0] + 1e-9:
-            t = bk[-1][0] + 0.005  # ajuste minimo para tempos estritamente crescentes
+            t = bk[-1][0] + 0.005  # tempos estritamente crescentes (ajuste de 5 ms)
         bk.append((t, k["x"], k["y"], k["z"]))
-    t_b = next(k["t"] for k in keys if k["gol"] and k["protegido"])
-    fim_k = [k for k in keys if k["gol"] and not k["protegido"]]
-    fim = (fim_k[-1]["t"], fim_k[-1]["x"], fim_k[-1]["y"], fim_k[-1]["z"]) if fim_k else None
-    if fim is None:
+    t_b = next((a["t"] for a in ancs if a["gol"] and a["protegido"]), None)
+    gol_fim = next((a for a in ancs if a["gol"] and not a["protegido"]), None)
+    if t_b is None or gol_fim is None:
         raise RuntimeError("chute do gol sem segmento de bola")
-    return bk, t_b, fim, {"ajustes": len(ajustes), "conflitos": conflitos, "keyframes": len(bk),
-                          "mesmo_instante": mesmo_instante}
+    fim = (gol_fim["t"], gol_fim["x"], gol_fim["y"], gol_fim["z"])
+    return bk, t_b, fim, {"ajustes": n_desl, "deslocamento_max": round(max_desl, 3),
+                          "conflitos": nao_res, "residuais": residuais, "keyframes": len(bk),
+                          "mesmo_instante": sorted(desl_eids)}
 
 
 def segmentos_posse(wev, t0, frames):
@@ -600,10 +665,11 @@ def interp_lin(ts, vs, t):
 
 
 def limpar_chaves(chaves):
-    """chaves: [(t, x, y, src)]. Junta os pontos com menos de 0,04 s; fica o de maior prioridade (ev > ff > 360)."""
+    """chaves: [(t, x, y, src)]. Junta so pontos equivalentes: < 0,04 s e < 0,3 m; fica o de maior prioridade.
+    Ancoras distintas (mesmo com menos de 0,04 s, mas em outro lugar) sao mantidas para a analise de conflitos."""
     out = []
     for k in sorted(chaves, key=lambda c: c[0]):
-        if out and k[0] - out[-1][0] < 0.04:
+        if out and k[0] - out[-1][0] < 0.04 and math.hypot(k[1] - out[-1][1], k[2] - out[-1][2]) < 0.3:
             if PRIO[k[3]] <= PRIO[out[-1][3]]:
                 out[-1] = k
         else:
@@ -611,9 +677,24 @@ def limpar_chaves(chaves):
     return out
 
 
+def _tempos_estritos(ks):
+    """Pontos do mesmo jogador no mesmo instante e lugares distintos: o segundo vai 20 ms depois (conflito
+    registrado pela velocidade entre eventos). Mantem a interpolacao valida."""
+    out = []
+    for k in sorted(ks, key=lambda c: c[0]):
+        if out and k[0] <= out[-1][0] + 1e-9:
+            k = (out[-1][0] + 0.02,) + tuple(k[1:])
+        out.append(k)
+    return out
+
+
 def podar_chaves(ks, t_ref):
     """Com ancoras: todas ficam; os demais pontos so entram se chegam as ancoras vizinhas sem passar de
     VMAX_CHAVE. Sem ancoras: so os pontos reais que chegam ao chute (t_ref) sem passar de VMAX_CHAVE."""
+    return _tempos_estritos(_podar_chaves(ks, t_ref))
+
+
+def _podar_chaves(ks, t_ref):
     ks = limpar_chaves(ks)
     anc = [k for k in ks if k[3] in ANCORAS]
     if anc:
@@ -1140,7 +1221,9 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
                            and t0 - 1e-6 <= tempo(e) <= t_fim + 1e-6]
     pos_orig = {j["id"]: j["pos"] for j in jogadores}
     extra_recebidas = posses_nao_registradas(eventos_bola_janela, t0, frames, bola, pos_orig, segs, ids)
-    segs = segs + extra_recebidas
+    # posse original (definicao comum): comeca no evento; termina quando a bola sai do pe (acima de 10,3 m/s)
+    # ou quando outro jogador toca a bola. Quadros de bola em voo nao sao posse. Feito antes da colagem.
+    segs = posse.segmentos_originais(FPS, bola, pos_orig, candidatos=segs + extra_recebidas)
     lim = {j["id"]: (GOLEIRO_LIM_X if j["goleiro"] else CAMPO_LIM_X, CAMPO_LIM_Y) for j in jogadores}
     novas, rel_posse = posse.colar(FPS, bola, {j["id"]: j["pos"] for j in jogadores}, segs,
                                    vmax=VMAX_LIMITE, lim=lim)
@@ -1148,6 +1231,21 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
         j["pos"] = [[round(x, 3), round(y, 3)] for x, y in novas[j["id"]]]
         if j["id"] in anc_pids and not j["estimado"] and parada(j["pos"]) > 0.8:
             j["estimado"] = True  # parado na trajetoria final (depois da colagem): marca, nao muda a posicao
+    # (c) quadro a quadro: trecho do jogador acima de VMAX_JOG depois da colagem fica registrado (ate 11,5 m/s);
+    # acima disso, o teste reprova.
+    for j in jogadores:
+        p_ = j["pos"]
+        i_ = 1
+        while i_ < len(p_):
+            if math.dist(p_[i_], p_[i_ - 1]) * FPS <= VMAX_JOG + 1e-6:
+                i_ += 1
+                continue
+            i0_, vmax_t = i_, 0.0
+            while i_ < len(p_) and math.dist(p_[i_], p_[i_ - 1]) * FPS > VMAX_JOG + 1e-6:
+                vmax_t = max(vmax_t, math.dist(p_[i_], p_[i_ - 1]) * FPS)
+                i_ += 1
+            ancoras_vel.append({"pid": j["id"], "t_ini": round((i0_ - 1) / FPS - 0.0, 2),
+                                "t_fim": round(i_ / FPS, 2), "v": round(vmax_t, 2)})
     if rel_posse["vel_jogador"]:
         avisos.append(f"posse: {len(rel_posse['vel_jogador'])} quadros do jogador acima de 10,5 m/s (registrado)")
     if rel_posse["cortados_bola_rapida"]:
@@ -1165,6 +1263,7 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
 
     return {
         "posse_runs": rel_posse["runs"], "posse_rel": rel_posse,
+        "posse_originais": [(q[0], q[1], q[2]) for q in segs],
         "ancoras": {"vel": ancoras_vel, "conflito": ancoras_conflito},
         "frames": frames, "frameChute": n_pre, "bola": bola, "jogadores": jogadores,
         "finalizadorId": str(gol["player"]["id"]), "time_gol": nome_time[gol_team], "time_outro": nome_time[outro_id],
@@ -1310,6 +1409,7 @@ def main():
     saida = []
     relatorio = []
     posse_lances = {}
+    posse_originais = {}  # segmentos detectados antes de qualquer recorte (medida (A) integral)
     posse_t0 = {}
     ancoras_lances = {}
     limitados_total = 0
@@ -1333,6 +1433,7 @@ def main():
         lance, r = ok
         saida.append(lance)
         posse_lances[lance["id"]] = [list(s) for s in r["posse_runs"]]
+        posse_originais[lance["id"]] = [list(s) for s in r["posse_originais"]]
         posse_t0[lance["id"]] = round(r["t0"], 4)
         ancoras_lances[lance["id"]] = dict(r["ancoras"], bola=[
             {"t_ini": round(c["t"] - r["t0"] - 0.3, 2), "t_fim": round(c["t"] - r["t0"] + 0.3, 2), "v": c["v"]}
@@ -1361,7 +1462,8 @@ def main():
     print(f"gravado {SAIDA} com {len(saida)} lances")
     POSSE_SAIDA.parent.mkdir(parents=True, exist_ok=True)
     with open(POSSE_SAIDA, "w", encoding="utf-8") as f:
-        json.dump({"fps": FPS, "lances": posse_lances, "t0": posse_t0, "ancoras": ancoras_lances},
+        json.dump({"fps": FPS, "lances": posse_lances, "originais": posse_originais, "t0": posse_t0,
+                   "ancoras": ancoras_lances},
                   f, ensure_ascii=False, indent=1)
         f.write("\n")
     print(f"posse gravada em {POSSE_SAIDA}")

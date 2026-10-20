@@ -23,6 +23,7 @@ Recria lances de futebol em 3D e mostra pelos olhos de qualquer jogador em campo
 - **StatsBomb Open Data** (uso não comercial, com atribuição): eventos de cada lance (passes, conduções, dribles, chute) e posição de todos os jogadores no instante do chute. Nas Copas de 2022 e nas Euros há também posições de quase todo mundo a cada evento (360). O movimento entre eventos é interpolado; jogadores que só aparecem no chute têm movimento **estimado** (marcados na lista e tracejados no minimapa).
 - **Last-Row / Friends of Tracking** (@lastrowview): tracking à mão, 20 quadros por segundo.
 - Gols brasileiros: desenho aproximado a partir de relatos; ver o aviso em cada lance.
+- **Bola no pé**: `scripts/posse.py` garante que, enquanto alguém conduz a bola, ela fique no pé dele (≤ 0,9 m em 99,9% dos quadros de posse). No StatsBomb o jogador vai até a bola (a bola é âncora dos eventos); no Last-Row e nos roteiros a bola vai até o pé do jogador (lá ela é aproximada). Auditoria: `python3 -I scripts/auditar_posse.py`.
 
 ## Estrutura
 - `scripts/prepare_statsbomb.py` → `web/data/hypados.json` (baixa e guarda cache em `data/raw/statsbomb/`, fora do git). Teste: `scripts/test_statsbomb.py`.

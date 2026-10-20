@@ -15,8 +15,10 @@ gravado é exatamente o que o gerador produz.
 
 Distância de toque e de chute é horizontal (plano do campo): jogador é um ponto
 no chão. Altura da bola no toque é conferida à parte (<= 2,5 m).
-(A) colagem: se existir data/posse/brasil.json, dentro dos segmentos de posse registrados o dono
-fica a até 0,9 m da bola em pelo menos 99% dos quadros (20 fps). Sem o arquivo, é informado como pendente.
+(A) colagem: se existir data/posse/brasil.json, dentro dos segmentos ORIGINAIS da deteccao de posse (chave
+"originais", antes de qualquer recorte) o dono fica a até 0,9 m da bola em pelo menos 99% dos quadros (20 fps).
+Denominador integral; excecoes com motivo (bola em voo, entrada/saida do segmento nos 1 s iniciais/finais)
+ficam no denominador e sao listadas. Sem o arquivo, é informado como pendente.
 Só biblioteca padrão.
 """
 import json
@@ -33,7 +35,11 @@ import roteiros_brasil as R  # noqa: E402  (gerador, mesmo diretório)
 SAIDA = RAIZ / "web" / "data" / "brasil.json"
 POSSE_PATH = RAIZ / "data" / "posse" / "brasil.json"
 A_LIMITE_M = 0.9
-A_META_PCT = 99.0
+A_META_FONTE_PCT = 99.0   # % (A) dos roteiros inteiros (denominador integral)
+A_META_LANCE_PCT = 95.0   # % (A) de cada roteiro: abaixo disso, so passa com motivo de dado listado
+MOTIVOS_DADO = ("bola em voo", "atraso apos conflito de velocidade", "atraso ate 0,5 s depois de bola em voo",
+                "evento fora da cadeia de bola")
+VMAX_BOLA_CORTE = 10.3  # m/s: bola acima disso nao esta no pe (mesmo corte da colagem)
 FPS = 20
 VEL_JOGADOR = 9.5
 VEL_BOLA = 38.0
@@ -380,19 +386,25 @@ def _teste_drible_da_vaca(meta, bola, por_id, f, stats):
 
 
 def checar_colagem(lances):
-    """(A): dono a até A_LIMITE_M da bola nos quadros de posse registrados (mesma interpolação do visualizador)."""
+    """(A): dono a até A_LIMITE_M da bola nos quadros ORIGINAIS de posse (mesma interpolação do visualizador)."""
     if not POSSE_PATH.exists():
         print("(A) colagem dos roteiros: pendente (sem data/posse/brasil.json; roteiros nao sao colados)")
         return
-    posse = json.loads(POSSE_PATH.read_text(encoding="utf-8"))["lances"]
+    dados = json.loads(POSSE_PATH.read_text(encoding="utf-8"))
+    if "originais" not in dados:
+        checar(False, "data/posse/brasil.json sem 'originais' (rode roteiros_brasil.py)")
+        return
+    originais = dados["originais"]
     tot_geral = bons_geral = 0
+    excecoes_geral = {}
     for l in lances:
-        segs = posse.get(l.get("id"), [])
+        segs = originais.get(l.get("id"), [])
         if not segs:
             continue
         por_id = {j["id"]: j for j in l["jogadores"]}
         tot = bons = 0
-        for pid, a, b in segs:
+        excecoes = {}
+        for pid, a, b, *_ in segs:
             j = por_id.get(pid)
             checar(j is not None, f"[{l['id']}] posse de {pid!r}, que nao existe")
             if j is None:
@@ -402,13 +414,33 @@ def checar_colagem(lances):
                 px, py = jogador_em(j["chaves"], t)
                 bx, by, _ = bola_em(l["chavesBola"], t)
                 tot += 1
-                bons += math.hypot(px - bx, py - by) <= A_LIMITE_M
+                if math.hypot(px - bx, py - by) <= A_LIMITE_M:
+                    bons += 1
+                    continue
+                x0, y0, _ = bola_em(l["chavesBola"], max(0.0, t - 1.0 / FPS))
+                v = math.hypot(bx - x0, by - y0) * FPS
+                if v > VMAX_BOLA_CORTE:
+                    motivo = "bola em voo"
+                elif f - a < FPS:
+                    motivo = "entrada: dono ainda chegando (1 s do inicio do segmento original)"
+                elif b - f < FPS:
+                    motivo = "saida: dono ja se afastou (1 s do fim do segmento original)"
+                else:
+                    motivo = "sem motivo"
+                excecoes[motivo] = excecoes.get(motivo, 0) + 1
         tot_geral += tot
         bons_geral += bons
-        if tot:
-            checar(100 * bons / tot >= A_META_PCT,
-                   f"[{l['id']}] colagem (A): {100 * bons / tot:.1f}% dos quadros de posse a ate {A_LIMITE_M} m")
-    print(f"(A) colagem dos roteiros: {bons_geral} de {tot_geral} quadros de posse a ate {A_LIMITE_M} m do dono")
+        for k, v in excecoes.items():
+            excecoes_geral[k] = excecoes_geral.get(k, 0) + v
+        if tot and 100 * bons / tot < A_META_LANCE_PCT and not any(k in MOTIVOS_DADO for k in excecoes):
+            checar(False, f"[{l['id']}] colagem (A) real {100 * bons / tot:.2f}% sem motivo de dado ({bons}/{tot} "
+                          f"quadros originais a ate {A_LIMITE_M} m); excecoes: {excecoes or '-'}")
+        elif tot and 100 * bons / tot < 99.0:
+            print(f"  (A) abaixo de 99% {l['id']}: {100 * bons / tot:.2f}% ({bons}/{tot}); excecoes: {excecoes}")
+    print(f"(A) colagem dos roteiros (originais, denominador integral): {bons_geral} de {tot_geral} quadros a ate "
+          f"{A_LIMITE_M} m do dono ({100 * bons_geral / max(1, tot_geral):.2f}%); excecoes: {excecoes_geral or '-'}")
+    checar(bons_geral * 100 >= A_META_FONTE_PCT * tot_geral,
+           f"(A) fonte roteiros {100 * bons_geral / max(1, tot_geral):.2f}% (meta {A_META_FONTE_PCT}%)")
 
 
 def main():

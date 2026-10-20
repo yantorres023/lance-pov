@@ -30,7 +30,8 @@ Regras:
   salto e grande (RAMPA_FATOR). Nada e movido fora da posse, salvo a rampa.
 - Limite de velocidade do caminho inteiro do jogador: se a mistura ou a bola forem rapidas demais, ele
   segue com atraso (erro de colagem), nunca com salto.
-- Mesmo jogador com duas posses separadas por folga curta e so bola lenta: vira uma posse so.
+- Mesmo jogador com duas posses separadas por folga de ate 0,3 s, ou com o jogador junto da bola durante
+  toda a folga (dados originais): vira uma posse so. Bola lenta sozinha nao junta posses.
 """
 import math
 
@@ -200,8 +201,15 @@ def _colar_uma_vez(fps, bola, jogadores, segmentos, vmax=VMAX_MS, lim=None, vmax
     while k < len(seg_info) - 1:
         x, y = seg_info[k], seg_info[k + 1]
         folga = y["a"] - x["b"] - 1
-        lenta = all(velb_m[f] <= corte for f in range(x["b"] + 1, y["a"]))
-        if x["pid"] == y["pid"] and lenta and x["r_out"] + y["r_in"] > folga:
+        # So junta quando ha continuidade real: folga de ate 0,3 s, ou o jogador ja estava junto da bola
+        # durante toda a folga nos dados originais (<= 1,5 m). Bola lenta sozinha nao basta (passe solto).
+        if folga <= round(0.3 * fps):
+            junta = True
+        else:
+            junta = all(jogadores[x["pid"]][f] is not None and bola[f] is not None
+                        and math.dist(jogadores[x["pid"]][f], bola[f][:2]) <= 1.5
+                        for f in range(x["b"] + 1, y["a"]))
+        if x["pid"] == y["pid"] and junta and x["r_out"] + y["r_in"] > folga:
             seg_info[k] = info(x["pid"], x["a"], y["b"], x["tipo"])
             del seg_info[k + 1]
             continue
@@ -319,3 +327,185 @@ def _fixar(xy, limite):
         lx, ly = limite
         xy = (min(max(xy[0], -lx), lx), min(max(xy[1], -ly), ly))
     return [round(xy[0], 4), round(xy[1], 4)]
+
+
+# ---------------------------------------------------------------- posse original e correcao da bola
+CONTATO_M = 1.5           # m: jogador a esta distancia da bola (dados originais) conta como toque
+SAIDA_VEL = 10.3          # m/s: bola acima disso saiu do pe (fora da posse)
+LAG_M = 0.9               # m: dono a mais disso da bola, dentro da posse, esta atrasado (a bola vai ao pe)
+PE_M = 0.45               # m: pe do dono, a frente, na direcao do movimento
+VEL_BOLA_CORR_MAX = 35.0  # m/s: limite da bola depois da correcao (roteiros testam 38)
+RAMPA_PE_FATOR = 25.0     # m/s: rampa da bola de (salto * fps / FATOR) quadros, no minimo 2
+
+
+def _vel_bola(bola, i, fps):
+    n = len(bola)
+    a, b = max(0, i - 1), min(n - 1, i + 1)
+    if a == b:
+        return 0.0
+    return math.dist(bola[b][:2], bola[a][:2]) * fps / (b - a)
+
+
+def segmentos_originais(fps, bola, jogadores, z_max=None, candidatos=None):
+    """Posse ORIGINAL, antes de qualquer correcao: lista de (pid, ini, fim, tipo), extremos inclusivos.
+
+    Sem candidatos (Last-Row, roteiros): comeca no primeiro quadro em que um jogador esta a ate CONTATO_M da bola
+    (o toque). Com candidatos (StatsBomb): comeca no instante do evento (candidato), ou no primeiro quadro sem bola
+    em voo depois dele; aqui so o fim e definido.
+    Termina quando a bola sai do pe: (a) bola acima de SAIDA_VEL (ou no ar, z > z_max): o ultimo quadro e o
+    anterior a saida; (b) outro jogador toca a bola: o fim e o ultimo quadro do dono a ate CONTATO_M antes do
+    toque. Quadros de chegada (antes do toque) e de bola em voo (depois da saida) nao sao posse, e nem os
+    quadros de bola solta entre um dono e o toque seguinte. Na posse de evento (StatsBomb) o evento e a verdade:
+    a conducao continua mesmo com o dono atrasado."""
+    n = len(bola)
+    sb = [_vel_bola(bola, i, fps) for i in range(n)]
+
+    def no_pe(f):
+        return sb[f] <= SAIDA_VEL and (z_max is None or bola[f][2] <= z_max)
+
+    def contato(pid, f):
+        p = jogadores[pid][f]
+        return p is not None and math.dist(p, bola[f][:2]) <= CONTATO_M
+
+    def mais_perto(cands, f):
+        return min(cands, key=lambda p: math.dist(jogadores[p][f], bola[f][:2]))
+
+    out = []
+    if candidatos is None:
+        dono, a, ult = None, None, None
+
+        def fecha(fim):
+            nonlocal dono
+            if dono is not None and fim is not None and fim >= a:
+                out.append((dono, a, fim, "toque"))
+            dono = None
+
+        for f in range(n):
+            if dono is None:
+                if no_pe(f):
+                    cs = [p for p in jogadores if contato(p, f)]
+                    if cs:
+                        dono, a, ult = mais_perto(cs, f), f, f
+                continue
+            if not no_pe(f):
+                fecha(f - 1)
+                continue
+            if contato(dono, f):
+                ult = f
+                continue
+            outros = [p for p in jogadores if p != dono and contato(p, f)]
+            if outros:
+                fecha(ult)
+                dono, a, ult = mais_perto(outros, f), f, f
+        fecha(n - 1)
+        return out
+
+    for pid, a, b, tipo in sorted(candidatos, key=lambda s: (s[1], s[2])):
+        ini = a
+        while ini <= b and not no_pe(ini):
+            ini += 1
+        if ini > b:
+            continue
+        fim, ult = b, None
+        for f in range(ini, b + 1):  # evento com bola (conducao, drible, passe, chute): so a saida e o toque de outro
+            if not no_pe(f):
+                fim = f - 1
+                break
+            if contato(pid, f):
+                ult = f
+                continue
+            if any(contato(q, f) for q in jogadores if q != pid):
+                fim = (ult if ult is not None else f - 1)
+                break
+        if fim >= ini:
+            out.append((pid, ini, fim, tipo))
+    return out
+
+
+def _pe_xy(jogadores, sent, pid, f, b, lim=None):
+    """Ponto do pe do dono no quadro f (f > b: mantem o ultimo quadro da posse); None se faltar dado.
+    lim (lx, ly): o ponto fica dentro do retangulo (a bola nao sai do campo nem cruza a linha de gol pela correcao)."""
+    g = min(f, b)
+    p = jogadores[pid][g]
+    if p is None:
+        return None
+    u = sent[pid][g] or (1.0, 0.0)
+    x, y = p[0] + PE_M * u[0], p[1] + PE_M * u[1]
+    if lim is not None:
+        x, y = min(max(x, -lim[0]), lim[0]), min(max(y, -lim[1]), lim[1])
+    return (x, y)
+
+
+def bola_no_pe(fps, bola, jogadores, segmentos, lim=None):
+    """Correcao da bola (Last-Row e roteiros). Dentro de cada posse, nos quadros em que o dono esta atrasado
+    (a mais de LAG_M da bola), a bola vai ao pe dele: PE_M a frente, no sentido do movimento. A bola entra
+    e sai por rampa (a entrada usa so quadros da posse; a saida pode passar do fim, para a bola voltar ao
+    caminho original). Rampa de (salto * fps / RAMPA_PE_FATOR) quadros, no minimo 2; se a velocidade da bola
+    passar de VEL_BOLA_CORR_MAX, a rampa aumenta. Os jogadores nao mudam.
+    lim (lx, ly), opcional: o pe-alvo fica dentro desse retangulo (a bola nao sai do campo pela correcao).
+    Devolve (bola_nova [[x, y, z], ...], relatorio)."""
+    n = len(bola)
+    nova = [[float(b[0]), float(b[1]), float(b[2])] for b in bola]
+    sent = {pid: _sentidos_jogador(pts, fps) for pid, pts in jogadores.items()}
+    original = [list(b) for b in nova]
+    rel = {"segmentos_com_correcao": 0, "vel_excedida": 0, "atrasos_restantes": 0}
+
+    def vel_frames(seq, lo, hi):
+        return max((math.dist(seq[f][:2], seq[f - 1][:2]) * fps for f in range(max(1, lo), min(n - 1, hi) + 1)),
+                   default=0.0)
+
+    for pid, a, b, tipo in sorted(segmentos, key=lambda s: (s[1], s[2])):
+        pts = jogadores[pid]
+        lag = [f for f in range(a, b + 1)
+               if pts[f] is not None and math.dist(pts[f], nova[f][:2]) > LAG_M]
+        grupos = []
+        for f in lag:
+            if grupos and f == grupos[-1][1] + 1:
+                grupos[-1][1] = f
+            else:
+                grupos.append([f, f])
+        if grupos:
+            rel["segmentos_com_correcao"] += 1
+        for s, e in grupos:
+            alvo_s = _pe_xy(jogadores, sent, pid, s, b, lim)
+            alvo_e = _pe_xy(jogadores, sent, pid, e, b, lim)
+            if alvo_s is None or alvo_e is None:
+                continue
+            J = math.dist(nova[s][:2], alvo_s)
+            J2 = math.dist(alvo_e, nova[e + 1][:2]) if e + 1 < n else 0.0
+            fator = 1.0
+            for _ in range(5):
+                kp = min(max(2, math.ceil(J * fps / RAMPA_PE_FATOR * fator)) if J > 1e-9 else 0, s)
+                kq = max(2, math.ceil(J2 * fps / RAMPA_PE_FATOR * fator)) if J2 > 1e-9 else 0
+                lo, hi = s - kp, e + kq
+                tmp = [list(x) for x in nova]
+                for f in range(lo, hi + 1):
+                    if f < 0 or f >= n:
+                        continue
+                    if s <= f <= e:
+                        w = 1.0
+                    elif f < s:
+                        w = (f - lo + 1) / (kp + 1)
+                    else:
+                        w = 1.0 - (f - e) / (kq + 1)
+                    alvo = _pe_xy(jogadores, sent, pid, f, b, lim)
+                    if alvo is None:
+                        continue
+                    x0, y0 = tmp[f][0], tmp[f][1]
+                    tmp[f][0] = x0 + w * (alvo[0] - x0)
+                    tmp[f][1] = y0 + w * (alvo[1] - y0)
+                if vel_frames(tmp, lo - 1, hi + 1) <= VEL_BOLA_CORR_MAX or fator >= 4.0:
+                    break
+                fator *= 1.5
+            if vel_frames(tmp, lo - 1, hi + 1) > VEL_BOLA_CORR_MAX:
+                rel["vel_excedida"] += 1
+            nova = tmp
+        for f in range(a, b + 1):
+            if pts[f] is not None and math.dist(pts[f], nova[f][:2]) > LAG_M:
+                rel["atrasos_restantes"] += 1
+
+    movidos = [f for f in range(n) if math.dist(nova[f][:2], original[f][:2]) > 1e-9]
+    rel["quadros_movidos"] = len(movidos)
+    rel["deslocamento_max"] = round(max((math.dist(nova[f][:2], original[f][:2]) for f in movidos), default=0.0), 3)
+    rel["vel_max"] = round(vel_frames(nova, 0, n - 1), 2)
+    return [[round(x, 3), round(y, 3), round(z, 3)] for x, y, z in nova], rel

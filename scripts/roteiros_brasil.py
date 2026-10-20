@@ -35,14 +35,10 @@ GOLEIRO_COR = "#7fb800"      # genérica: camisa de goleiro não verificada
 GOLEIRO_BORDA = "#111111"
 
 FPS = 20
-VEL_MAX_ROTEIRO = 9.3   # m/s: colagem; test_brasil.VEL_JOGADOR e 9,5 (margem para o arredondamento das chaves)
-VEL_CHAVES = 9.4        # m/s: limite verificado nas chaves e na trajetoria amostrada (Catmull-Rom)
 # Excecoes justificadas: intervalo (t_ini, t_fim) em que a bola nao esta no pe. Drible da vaca de Neymar:
 # bola e jogador passam por lados opostos do marcador (test_brasil exige separacao de 2 m no cruzamento).
 EXCECAO_SEM_POSSE = {"neymar-santos-flamengo-2011": [(2.6, 4.7)]}
-MAX_CHAVES = 30         # test_brasil: jogador envolvido tem de 3 a 30 chaves (adaptativas)
-TOL_COLA = 0.4          # m: erro maximo entre as chaves e a trajetoria colada
-MARGEM_JANELA = 20      # quadros de folga em cada janela de reducao (candidatos a chave)
+TOL_BOLA = 0.03         # m: erro maximo entre a interpolacao das chaves da bola e o quadro corrigido
 Z_POSSE = 0.6           # m: bola acima disso nao esta no pe, nao ha posse
 JANELA_TOQUE = 0.1      # s antes e depois de cada toque
 
@@ -118,166 +114,79 @@ def _bola_em(bola, t):
     raise ValueError("t fora da faixa da bola")
 
 
-def _segmentos_toques(toques, zs, n):
-    """Posse em quadros (id, ini, fim). Cada toque vale +-JANELA_TOQUE; toques seguidos do mesmo
-    jogador formam uma conducao. Trechos com a bola no ar (z > Z_POSSE) nao sao posse."""
-    grupos = []
-    for t, pid in sorted(toques):
-        if grupos and grupos[-1][0] == pid:
-            grupos[-1][2] = t
-        else:
-            grupos.append([pid, t, t])
-    segs = []
-    for pid, t1, t2 in grupos:
-        a = max(0, round((t1 - JANELA_TOQUE) * FPS))
-        b = min(n - 1, round((t2 + JANELA_TOQUE) * FPS))
-        f = a
-        while f <= b:
-            if zs[f] > Z_POSSE:
-                f += 1
-                continue
-            g = f
-            while g < b and zs[g + 1] <= Z_POSSE:
-                g += 1
-            segs.append((pid, f, g))
-            f = g + 1
-    return segs
+def _chaves_da_bola(chaves, bola_nova, bola_orig, tol=TOL_BOLA):
+    """Chaves da bola depois da correcao. Chaves originais (touches e chute incluidos) ficam nos seus instantes;
+    onde a bola mudou, a posicao vem do quadro corrigido no mesmo instante. Acrescenta chaves (em instantes de
+    quadro) ate a interpolacao linear ficar a ate `tol` m de cada quadro. Devolve [(t, x, y, z)]."""
+    n = len(bola_nova)
 
-
-
-
-def _chaves_coladas(chaves, colada, t_toques, bola, n):
-    """Chaves novas [t, x, y] de um jogador cuja trajetoria colada e `colada` (um ponto por quadro a FPS).
-
-    Os quadros alterados formam grupos (separados por mais de 1 s ficam em grupos distintos). Cada grupo
-    e reduzido em sua janela; fora dela as chaves ficam como estao. Devolve (chaves, erro_max_m, chaves_nas_janelas)."""
-    orig = [_cr(chaves, f / FPS) for f in range(n)]
-    mud = [f for f in range(n) if math.dist(orig[f], colada[f]) > 1e-6]
-    if not mud:
-        return chaves, 0.0, 0
-    grupos = []
-    for f in mud:
-        if grupos and f - grupos[-1][1] <= FPS:
-            grupos[-1][1] = f
-        else:
-            grupos.append([f, f])
-    ks, e_max, n_tot = list(chaves), 0.0, 0
-    for fa_, fb_ in grupos:  # candidatos numa janela com folga; erro medido na zona alterada +-10 quadros
-        ks, e_, nk = _reduzir_janela(ks, colada, t_toques, bola, n, max(0, fa_ - MARGEM_JANELA),
-                                     min(n - 1, fb_ + MARGEM_JANELA), max(0, fa_ - 10), min(n - 1, fb_ + 10))
-        e_max = max(e_max, e_)
-        n_tot += nk
-    return ks, e_max, n_tot
-
-
-def _reduzir_janela(chaves, colada, t_toques, bola, n, fa, fb, ea, eb):
-    """Reduz as chaves de uma janela [fa, fb] (quadros) para o erro maximo TOL_COLA medido em [ea, eb]."""
-    ta, tb = round(fa / FPS, 2), round(fb / FPS, 2)
-    fora = [tuple(k) for k in chaves if k[0] < ta - 1e-9 or k[0] > tb + 1e-9]
-    cand = {ta, tb}
-    cand |= {round(k[0], 2) for k in chaves if ta - 1e-9 <= k[0] <= tb + 1e-9}
-    cand |= {round(t, 2) for t in t_toques if ta - 1e-9 <= t <= tb + 1e-9}
-    def valor(t):
+    def em(t, seq):  # interpolacao linear de uma sequencia por quadro no instante t (exato, nao arredondado)
         x = t * FPS
-        i = min(int(math.floor(x + 1e-9)), n - 1)
-        if i >= n - 1:
-            return tuple(colada[-1])
-        s = x - i
-        return (colada[i][0] * (1 - s) + colada[i + 1][0] * s, colada[i][1] * (1 - s) + colada[i + 1][1] * s)
+        i = min(max(int(math.floor(x + 1e-9)), 0), n - 2)
+        s = min(max(x - i, 0.0), 1.0)
+        return tuple(seq[i][d] * (1 - s) + seq[i + 1][d] * s for d in (0, 1, 2))
 
-    def montar_chaves(c):
-        return sorted(fora + [(t,) + valor(t) for t in c], key=lambda k: k[0])
-
-    def erro(c):
-        ks = montar_chaves(c)
-        for a_, b_ in zip(ks, ks[1:]):  # velocidade entre chaves (teste: <= VEL_CHAVES)
-            if math.dist(a_[1:], b_[1:]) > VEL_CHAVES * (b_[0] - a_[0]) + 1e-9:
-                return float("inf"), max(0, min(n - 1, int(round(b_[0] * FPS))))
-        pior, quadro = 0.0, None
-        ant = None
-        for f in range(ea, eb + 1):
-            p_ = _cr(ks, f / FPS)
-            if ant is not None and math.dist(p_, ant) * FPS > VEL_CHAVES:  # velocidade amostrada
-                return float("inf"), f
-            ant = p_
-            d = math.dist(p_, colada[f])
-            if d > pior:
-                pior, quadro = d, f
-        return pior, quadro
-
-    e, quadro = erro(cand)
-    tentativas = 0
-    while e > TOL_COLA and quadro is not None and tentativas < 200:
-        tentativas += 1
-        # insere um quadro perto do pior ponto (o proprio, ou vizinho, ou meio-caminho entre chaves)
-        ordenadas = sorted(cand)
-        cands_novos = []
-        for dq in (0, -1, 1, -2, 2):
-            tq = round((quadro + dq) / FPS, 2)
-            if ta < tq < tb and tq not in cand:
-                cands_novos.append(tq)
-        if not cands_novos:
-            prox = [t for t in ordenadas if t >= quadro / FPS]
-            ante = [t for t in ordenadas if t <= quadro / FPS]
-            if prox and ante and prox[0] - ante[-1] > 0.051:
-                cands_novos.append(round((ante[-1] + prox[0]) / 2 / 0.05) * 0.05)
-        if not cands_novos:  # ultimo recurso: quadros vizinhos ainda nao usados
-            cands_novos = [round(q / FPS, 2) for q in range(quadro - 6, quadro + 7)
-                           if fa <= q <= fb and round(q / FPS, 2) not in cand and ta < round(q / FPS, 2) < tb]
-        if not cands_novos:
+    mud = {f for f in range(n) if math.dist(bola_nova[f][:2], bola_orig[f][:2]) > 1e-6}
+    ks = []
+    for t, x, y, z in chaves:
+        f = round(t * FPS)
+        if any(g in mud for g in (f - 1, f, f + 1)) and 0 <= f < n:
+            nx, ny, nz = em(t, bola_nova)
+            ks.append((t, nx, ny, nz))
+        else:
+            ks.append((t, x, y, z))
+    ks.sort(key=lambda k: k[0])
+    while True:
+        trocou = False
+        for i in range(len(ks) - 1):
+            (t1, x1, y1, z1), (t2, x2, y2, z2) = ks[i], ks[i + 1]
+            pior, quadro = 0.0, None
+            for f in range(math.ceil(t1 * FPS - 1e-9), math.floor(t2 * FPS + 1e-9) + 1):
+                if not (0 <= f < n) or f / FPS <= t1 + 1e-9 or f / FPS >= t2 - 1e-9:
+                    continue
+                s = (f / FPS - t1) / (t2 - t1)
+                d = math.dist((x1 + (x2 - x1) * s, y1 + (y2 - y1) * s), bola_nova[f][:2])
+                if d > pior:
+                    pior, quadro = d, f
+            if quadro is not None and pior > tol:
+                ks.insert(i + 1, (round(quadro / FPS, 2), bola_nova[quadro][0], bola_nova[quadro][1],
+                                  bola_nova[quadro][2]))
+                trocou = True
+                break
+        if not trocou:
             break
-        cand.add(round(cands_novos[0], 2))
-        e, quadro = erro(cand)
-    mudou = True
-    while mudou:  # tira chaves ate nao haver mais remocao possivel (repete, pois uma remocao libera outras)
-        mudou = False
-        for t in sorted(cand):
-            if t in (ta, tb):
-                continue
-            teste = cand - {t}
-            if erro(teste)[0] <= TOL_COLA:
-                cand = teste
-                mudou = True
-    e, _ = erro(cand)
-    novas = montar_chaves(cand)
-    return novas, e, len(cand)
+    return [tuple(k) for k in ks]
 
 
 def _colar_jogadores(dur, bola, nomes, toques, lance_id=""):
-    """Aplica a colagem da posse aos jogadores nomeados (muda `chaves` in place).
-    Devolve (segmentos colados em quadros, relatorio) para a auditoria."""
+    """Posse original (a partir do toque, antes de qualquer correcao) e correcao da BOLA: onde o dono esta
+    atrasado dentro da posse, a bola vai ao pe dele. Os jogadores desenhados nao se movem.
+    Devolve (chaves da bola corrigidas [(t,x,y,z)], relatorio com 'runs' e 'originais')."""
     n = round(dur * FPS) + 1
     bola_q = [list(_bola_em(bola, f / FPS)) for f in range(n)]
-    zs = [b[2] for b in bola_q]
-    segs = [s for s in _segmentos_toques(toques, zs, n)]
+    pos = {j["pid"]: [list(_cr(j["chaves"], f / FPS)) for f in range(n)] for j in nomes}
+    segs = posse.segmentos_originais(FPS, bola_q, pos, z_max=Z_POSSE)
     for t1_, t2_ in EXCECAO_SEM_POSSE.get(lance_id, []):  # excecoes justificadas (ver EXCECAO_SEM_POSSE)
         e1, e2 = round((t1_ + 0.05) * FPS), round((t2_ - 0.05) * FPS)
         recortados = []
-        for pid, a, b in segs:
+        for pid, a, b, tipo in segs:
             if b < e1 or a > e2:
-                recortados.append((pid, a, b))
+                recortados.append((pid, a, b, tipo))
                 continue
             if a < e1:
-                recortados.append((pid, a, e1 - 1))
+                recortados.append((pid, a, e1 - 1, tipo))
             if b > e2:
-                recortados.append((pid, e2 + 1, b))
+                recortados.append((pid, e2 + 1, b, tipo))
         segs = recortados
-    donos = {s[0] for s in segs}
-    nomes_por_id = {j["pid"]: j for j in nomes}
-    if not donos:
-        return [], {"runs": [], "quadros_colados": 0, "conflitos": 0, "vel_jogador": [], "vel_bola": [],
-                    "chaves": {}}
-    orig = {pid: [list(_cr(nomes_por_id[pid]["chaves"], f / FPS)) for f in range(n)] for pid in donos}
-    novas, rel = posse.colar(FPS, bola_q, orig, segs, vmax=VEL_MAX_ROTEIRO)
-
-    info = {}
-    for pid in donos:
-        t_pid = [t for t, p in toques if p == pid]
-        ks, erro, n_ch = _chaves_coladas(nomes_por_id[pid]["chaves"], novas[pid], t_pid, bola, n)
-        nomes_por_id[pid]["chaves"] = [tuple(k) for k in ks]
-        info[pid] = {"erro_m": round(erro, 3), "chaves_janela": n_ch, "chaves_total": len(ks)}
-    rel["chaves"] = info
-    return rel["runs"], rel
+    if not segs:
+        return bola, {"runs": [], "originais": [], "quadros_movidos": 0, "deslocamento_max": 0.0,
+                      "vel_max": 0.0, "segmentos_com_correcao": 0, "atrasos_restantes": 0, "vel_excedida": 0}
+    nova, rel = posse.bola_no_pe(FPS, bola_q, pos, segs, lim=(52.4, 33.9))
+    rel["runs"] = segs
+    rel["originais"] = segs  # segmentos da posse original, antes da correcao (auditoria)
+    if rel["quadros_movidos"]:
+        bola = _chaves_da_bola(bola, nova, bola_q)
+    return bola, rel
 
 
 def montar(ordem, lance_id, titulo, subtitulo, contexto, duracao, ataque, defesa,
@@ -286,7 +195,8 @@ def montar(ordem, lance_id, titulo, subtitulo, contexto, duracao, ataque, defesa
     dur = float(duracao)
     bola = [tuple(b) for b in bola]
     deriva = max(-2.0, min(2.0, 0.1 * (bola[-1][1] - bola[0][1])))  # o elenco acompanha a bola de leve
-    segmentos, rel_posse = _colar_jogadores(dur, bola, nomeados, toques, lance_id)
+    bola, rel_posse = _colar_jogadores(dur, bola, nomeados, toques, lance_id)
+    segmentos = rel_posse["runs"]
     jogadores = []
     for lado, time in (("attack", ataque), ("defense", defesa)):
         nomes = [j for j in nomeados if j["time"] == lado]
@@ -645,15 +555,17 @@ def main():
         f.write("\n")
     POSSE_SAIDA.parent.mkdir(parents=True, exist_ok=True)
     posse_lances = {d["id"]: [list(s) for s in m["posse_rel"]["runs"]] for d, m in gerados}
+    posse_originais = {d["id"]: [list(s) for s in m["posse_rel"]["originais"]] for d, m in gerados}
     with open(POSSE_SAIDA, "w", encoding="utf-8") as f:
-        json.dump({"fps": FPS, "lances": posse_lances}, f, ensure_ascii=False, indent=1)
+        json.dump({"fps": FPS, "lances": posse_lances, "originais": posse_originais}, f, ensure_ascii=False, indent=1)
         f.write("\n")
     for d, m in gerados:
         rel = m["posse_rel"]
-        for pid, info in rel["chaves"].items():
-            print(f"{d['ordem']:>2} {d['id']} {pid}: erro {info['erro_m']:.3f} m, chaves {info['chaves_total']}")
-        if rel["vel_jogador"] or rel["conflitos"]:
-            print(f"   aviso posse: vel_jogador={len(rel['vel_jogador'])} conflitos={rel['conflitos']}")
+        print(f"{d['ordem']:>2} {d['id']}: posse original {len(rel['originais'])} segmentos; bola ao pe: "
+              f"{rel['quadros_movidos']} quadros, deslocamento max {rel['deslocamento_max']} m, vel max "
+              f"{rel['vel_max']} m/s, segmentos corrigidos {rel['segmentos_com_correcao']}, atrasos restantes "
+              f"{rel['atrasos_restantes']}, velocidade acima do limite {rel['vel_excedida']}, "
+              f"chaves da bola {len(d['chavesBola'])}")
     print(f"{len(lances)} lances -> {SAIDA}")
     print(f"posse -> {POSSE_SAIDA}")
 

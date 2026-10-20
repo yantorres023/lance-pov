@@ -186,13 +186,15 @@ def detectar_posse(lance):
 
 
 def colar_lance(lance):
-    """Aplica a colagem da posse ao lance (muda as posicoes dos jogadores). Devolve (segmentos, relatorio)."""
-    segs = detectar_posse(lance)
+    """Posse original (segmentos a partir do toque, antes de qualquer correcao) e correcao da bola: onde o dono
+    esta atrasado dentro da posse, a BOLA vai ao pe dele (a bola deste lance e rastreada a mao). Os jogadores
+    nao se movem. Devolve (segmentos originais, segmentos, relatorio)."""
     pos = {j["id"]: j["pos"] for j in lance["jogadores"]}
-    novas, rel = posse.colar(lance["fps"], lance["bola"], pos, segs, vmax=VMAX_JOG)
-    for j in lance["jogadores"]:
-        j["pos"] = [[round(x, 3), round(y, 3)] for x, y in novas[j["id"]]]
-    return rel["runs"], rel
+    segs = posse.segmentos_originais(lance["fps"], lance["bola"], pos, z_max=Z_POSSE_LR)
+    nova, rel = posse.bola_no_pe(lance["fps"], lance["bola"], pos, segs,
+                                 lim=(X_SIZE / 2 - 0.1, Y_SIZE / 2 - 0.1))
+    lance["bola"] = nova
+    return segs, segs, rel
 
 
 def metros(x, y):
@@ -254,19 +256,22 @@ def main(origem, destino):
         for t, lance in ler(Path(origem) / nome, titulo).items():
             saida.append(montar(t, lance["linhas"]))
     posse_lances = {}
+    posse_originais = {}
     for l in saida:
-        runs, rel = colar_lance(l)
+        originais, runs, rel = colar_lance(l)
         posse_lances[l["id"]] = [list(s) for s in runs]
+        posse_originais[l["id"]] = [list(s) for s in originais]
         print(f"{l['titulo']}: {l['frames']} frames, {len(l['jogadores'])} jogadores; "
-              f"posse {len(runs)} segmentos, {rel['quadros_colados']} quadros, "
-              f"fora do alcance {rel['fora_do_alcance']}, bola rapida cortada {rel['cortados_bola_rapida']}, "
-              f"conflitos {rel['conflitos']}, velocidade acima do limite {len(rel['vel_jogador'])}")
+              f"posse original {len(originais)} segmentos; bola ao pe: {rel['quadros_movidos']} quadros, "
+              f"deslocamento max {rel['deslocamento_max']} m, vel max {rel['vel_max']} m/s, "
+              f"segmentos corrigidos {rel['segmentos_com_correcao']}, atrasos restantes {rel['atrasos_restantes']}, "
+              f"velocidade acima do limite {rel['vel_excedida']}")
     Path(destino).parent.mkdir(parents=True, exist_ok=True)
     with open(destino, "w") as f:
         json.dump({"lances": saida}, f, separators=(",", ":"), ensure_ascii=False)
     POSSE_SAIDA.parent.mkdir(parents=True, exist_ok=True)
     with open(POSSE_SAIDA, "w", encoding="utf-8") as f:
-        json.dump({"fps": FPS, "lances": posse_lances}, f, ensure_ascii=False, indent=1)
+        json.dump({"fps": FPS, "lances": posse_lances, "originais": posse_originais}, f, ensure_ascii=False, indent=1)
         f.write("\n")
 
 
