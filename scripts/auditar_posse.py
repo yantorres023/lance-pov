@@ -1,8 +1,8 @@
 """Audita a distancia entre bola e jogador nos tres conjuntos de lances.
 
 Uso: python3 -I scripts/auditar_posse.py [--limite 1.8] [--detalhe] [--dados DIR]
-Sai com codigo 0 so se: cada fonte tem (A) >= 99%; nenhum lance abaixo de 95% (A) sem motivo de dado listado;
-e (B) total nao passa de 6,5% (bola solta legitima entre donos).
+Sai com codigo 0 so se: cada fonte tem (A) >= 99%; cada lance tem (A) >= 99% com as excecoes por quadro
+justificadas por evidencia original (scripts/evidencia.py); e (B) total nao passa de META_B_TOTAL_PCT.
 
 Duas medidas, por lance:
 
@@ -25,7 +25,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import test_statsbomb as TS  # noqa: E402  (mesma classificacao de conflito do dado usada pelo teste)
+import test_statsbomb as TS  # noqa: E402  (janelas de conflito registradas, a partir dos eventos originais)
+import evidencia as EV  # noqa: E402  (medida (A) com excecoes por quadro e evidencia original)
+from test_lastrow import EXCECOES_ACEITAS  # noqa: E402  (exceções nominais decididas pelo coordenador)
 
 RAIZ = Path(__file__).resolve().parent.parent
 RAIZ_DADOS = RAIZ / "web" / "data"
@@ -37,7 +39,7 @@ META_A_FONTE_PCT = 99.0  # % (A) de cada fonte (denominador integral)
 META_A_LANCE_PCT = 95.0  # % (A) de cada lance: abaixo disso, so passa com motivo de dado listado
 MOTIVOS_DADO = ("bola em voo", "atraso apos conflito de velocidade", "atraso ate 0,5 s depois de bola em voo",
                 "evento fora da cadeia de bola")
-META_B_TOTAL_PCT = 6.5   # % (B) total; aceito em 20/10/2026: o restante é bola solta legítima (passe rolando, bola empurrada à frente)
+META_B_TOTAL_PCT = 7.5   # % (B) total, informativo; aceito em 20/10/2026: bola solta legítima (passe rolando, bola empurrada à frente, bola parada não movida)
 META_B_PCT = 5.0   # % dos quadros da metrica (B) longe da bola
 META_B_TRECHO = 0.5  # s: maior trecho continuo longe da bola
 VEL_B_MIN, VEL_B_MAX = 0.5, 9.0  # m/s: faixa de bola da metrica (B)
@@ -86,53 +88,43 @@ def arrays(l):
 
 
 def carregar_posse(pasta):
-    """id do lance -> lista de (id do jogador, ini, fim) em quadros de 20 fps, dos segmentos ORIGINAIS
-    (antes de qualquer recorte). Junta todos os arquivos. Devolve (segmentos, fonte por id do lance)."""
-    segs, fonte = {}, {}
+    """Por lance: segmentos ORIGINAIS da posse (lista (pid, ini, fim)), fonte (arquivo) e evidencia original
+    (bola original, distancia original por quadro, registro de correcao recusada). Devolve (segmentos, fonte, extra)."""
+    segs, fonte, extra = {}, {}, {}
     for arq in sorted(pasta.glob("*.json")):
         dados = json.loads(arq.read_text(encoding="utf-8"))
-        if "originais" not in dados:
-            raise SystemExit(f"{arq.name} sem 'originais' (rode o gerador de novo)")
+        if "originais" not in dados or "bola_original" not in dados:
+            raise SystemExit(f"{arq.name} sem 'originais'/'bola_original' (rode o gerador de novo)")
         for lid, lista in dados["originais"].items():
-            segs.setdefault(lid, []).extend((str(p), int(a), int(b)) for p, a, b, *_ in lista)
+            lista_t = [(str(p), int(a), int(b)) for p, a, b, *_ in lista]
+            segs.setdefault(lid, []).extend(lista_t)
             fonte[lid] = arq.stem
-    return segs, fonte
+            extra[lid] = {
+                "lista": lista_t,
+                "bola": dados["bola_original"].get(lid),
+                "dists": dados.get("distancia_original", {}).get(lid, []),
+                "rec": {(p, f): k for p, f, k in dados.get("recusados", {}).get(lid, [])},
+            }
+    return segs, fonte, extra
 
 
-def medir_a(l, segs, janelas=()):
-    """(A): (quadros, quadros dentro de META_A, pior distancia, instante da pior, excecoes por motivo).
-    Denominador integral (todos os quadros dos segmentos originais). Excecao = quadro fora da meta com motivo
-    (test_statsbomb.motivo_conflito, ou entrada/saida do segmento nos 1 s iniciais/finais); sem motivo = falha."""
+def medir_a(l, ex, janelas):
+    """(A) por lance, sobre os segmentos ORIGINAIS (denominador integral). Quadro acima de 0,9 m do dono e
+    justificado so com evidencia no dado original (scripts/evidencia.py). Devolve o dict de evidencia.avaliar."""
     fps, n, bola, jog = arrays(l)
     pos = dict(jog)
-    tot = bons = 0
-    pior, t_pior = 0.0, None
-    excecoes = {}
-    for pid, a, b in segs:
+
+    def pos_fn(pid, f):
         p = pos.get(pid)
-        if p is None:
-            continue
-        for f in range(max(0, a), min(n - 1, b) + 1):
-            tot += 1
-            if p[f] is None:
-                excecoes["sem dado"] = excecoes.get("sem dado", 0) + 1
-                continue
-            d = math.hypot(p[f][0] - bola[f][0], p[f][1] - bola[f][1])
-            if d <= META_A:
-                bons += 1
-                continue
-            motivo = TS.motivo_conflito(bola, n, pid, f, f / fps, None, janelas)
-            if not motivo:
-                if f - a < fps:
-                    motivo = "entrada: dono ainda chegando (1 s do inicio do segmento original)"
-                elif b - f < fps:
-                    motivo = "saida: dono ja se afastou (1 s do fim do segmento original)"
-                else:
-                    motivo = "sem motivo"
-            excecoes[motivo] = excecoes.get(motivo, 0) + 1
-            if motivo == "sem motivo" and d > pior:
-                pior, t_pior = d, f / fps
-    return tot, bons, pior, t_pior, excecoes
+        return None if p is None or p[f] is None else (p[f][0], p[f][1])
+
+    def bola_fn(f):
+        return bola[f]
+
+    jan = {}
+    for pid_, ta, tb, _ in janelas:
+        jan.setdefault(pid_, []).append((ta, tb))
+    return EV.avaliar(fps, n, ex["lista"], ex["dists"], pos_fn, bola_fn, ex["bola"] or bola, jan, ex["rec"])
 
 
 def medir_b(l, limite):
@@ -179,14 +171,14 @@ def main():
     ap.add_argument("--detalhe", action="store_true")
     ap.add_argument("--dados", type=Path, default=RAIZ_DADOS)
     a = ap.parse_args()
-    segs, fonte_de = carregar_posse(RAIZ_POSSE)
+    segs, fonte_de, extra = carregar_posse(RAIZ_POSSE)
     janelas = carregar_janelas(RAIZ_POSSE)
-    tot_a = bons_a = 0
-    por_fonte = {}  # fonte -> [quadros, dentro de 0,9 m]
-    abaixo99 = []
+    tot_a = ok_a = 0
+    por_fonte = {}  # fonte -> [quadros, ok + justificados]
+    ok_puro_fonte = {}
     excl_total = {}
+    abaixo99, falhas_a, falhas_b = [], [], []
     tot_b_ruins = tot_b_dom = 0
-    falhas_a, falhas_b = [], []
     vistos = set()  # um lance so conta uma vez (o Origi aparece em hypados.json e em lances.json)
     for nome in ARQUIVOS:
         lances = json.loads((a.dados / nome).read_text(encoding="utf-8"))["lances"]
@@ -195,55 +187,67 @@ def main():
             if l["id"] in vistos:
                 continue
             vistos.add(l["id"])
-            ra = medir_a(l, segs.get(l["id"], []), janelas.get(l["id"], ())) if l["id"] in segs else None
             rb = medir_b(l, a.limite)
             tot_b_ruins += rb["ruins"]
             tot_b_dom += rb["dominada"]
             pct_b = 100 * rb["ruins"] / rb["dominada"] if rb["dominada"] else 0
             marca_b = pct_b > META_B_PCT or rb["maior_seq_s"] > META_B_TRECHO
+            ra = medir_a(l, extra[l["id"]], janelas.get(l["id"], ())) if l["id"] in extra else None
             if ra is not None:
-                tot_a += ra[0]
-                bons_a += ra[1]
-                fb = por_fonte.setdefault(fonte_de.get(l["id"], "?"), [0, 0])
-                fb[0] += ra[0]
-                fb[1] += ra[1]
-                for k_, v_ in ra[4].items():
+                fonte = fonte_de.get(l["id"], "?")
+                fb = por_fonte.setdefault(fonte, [0, 0])
+                fb[0] += ra["tot"]
+                fb[1] += ra["ok"] + sum(ra["justificados"].values())
+                fp = ok_puro_fonte.setdefault(fonte, [0, 0])
+                fp[0] += ra["tot"]
+                fp[1] += ra["ok"]
+                tot_a += ra["tot"]
+                ok_a += ra["ok"] + sum(ra["justificados"].values())
+                for k_, v_ in ra["justificados"].items():
                     excl_total[k_] = excl_total.get(k_, 0) + v_
-                pct_a = 100 * ra[1] / ra[0] if ra[0] else 100
-                marca_a = pct_a < META_A_LANCE_PCT and not any(k_ in MOTIVOS_DADO for k_ in ra[4])
-                txt_a = f"A {ra[1]:4d}/{ra[0]:4d} ok ({pct_a:6.2f}%)"
-                if pct_a < 99.0:
-                    abaixo99.append(f"{l.get('ordem', '')} {l['titulo']}: {pct_a:.2f}% excecoes {ra[4] or '-'}")
-                if marca_a:
-                    falhas_a.append(f"{l.get('ordem', '')} {l['titulo']}: {pct_a:.2f}% sem motivo de dado "
-                                    f"(meta {META_A_LANCE_PCT}%); excecoes {ra[4] or '-'}")
+                pct_just, pct_ok = ra["pct_just"], ra["pct_ok"]
+                txt_a = f"A ok {pct_ok:6.2f}% | com excecoes por quadro {pct_just:6.2f}%"
+                if pct_ok < 99.0:
+                    abaixo99.append(f"{l.get('ordem', '')} {l['titulo']}: ok {pct_ok:.2f}%; excecoes por quadro: "
+                                    + ("; ".join(f"{k}={v} (ex.: {ra['exemplos'][k]})"
+                                                 for k, v in ra["justificados"].items()) or "-"))
+                aceita = EXCECOES_ACEITAS.get(l["id"])
+                if pct_just < 99.0 and aceita and ra["falhas"] and all(d_ <= aceita["max_dist"] for _, _, d_, _ in ra["falhas"]):
+                    abaixo99.append(f"   exceção aceita: {len(ra['falhas'])} quadros a <= {aceita['max_dist']} m — {aceita['motivo']}")
+                elif pct_just < 99.0:
+                    falhas_a.append(f"{l.get('ordem', '')} {l['titulo']}: {pct_just:.2f}% com excecoes; "
+                                    f"{len(ra['falhas'])} quadros sem evidencia original: "
+                                    f"{[(p_, f_, d_) for p_, f_, d_, _ in ra['falhas'][:4]]}")
             else:
-                marca_a = False
                 txt_a = "A sem posse registrada"
             if marca_b:
-                falhas_b.append(f"{l.get('ordem', '')} {l['titulo']}: {pct_b:.1f}% longe, trecho {rb['maior_seq_s']:.2f}s em {rb['t_maior'] or 0:.2f}s")
-            if a.detalhe or marca_a or marca_b:
+                falhas_b.append(f"{l.get('ordem', '')} {l['titulo']}: {pct_b:.1f}% longe, trecho "
+                                f"{rb['maior_seq_s']:.2f}s em {rb['t_maior'] or 0:.2f}s")
+            if a.detalhe or (ra is not None and pct_just < 99.0) or marca_b:
                 tp = f"{rb['t_pior']:.2f}s" if rb["t_pior"] is not None else "-"
                 print(f"  {str(l.get('ordem', '')):>3} {l['titulo'][:40]:40} {txt_a} | B dom={rb['dominada']:4d} "
                       f"longe={rb['ruins']:4d} ({pct_b:4.1f}%) pior={rb['pior']:5.1f} m em {tp:>7} "
-                      f"trecho={rb['maior_seq_s']:.2f}s{'  <<' if (marca_a or marca_b) else ''}")
-    print(f"\nTOTAL (A) real, originais, denominador integral: {bons_a} de {tot_a} quadros a até {META_A} m do dono ({100 * bons_a / max(1, tot_a):.2f}%)")
+                      f"trecho={rb['maior_seq_s']:.2f}s")
+    print(f"\nTOTAL (A) com excecoes por quadro justificadas: {ok_a} de {tot_a} ({100 * ok_a / max(1, tot_a):.2f}%)")
     falhas_fonte = []
     for fonte_nome, (q_, b_) in sorted(por_fonte.items()):
         pct_f = 100 * b_ / max(1, q_)
-        print(f"  (A) fonte {fonte_nome}: {b_} de {q_} = {pct_f:.2f}%")
+        pq, po = ok_puro_fonte[fonte_nome]
+        print(f"  (A) fonte {fonte_nome}: com excecoes {b_} de {q_} = {pct_f:.2f}%; ok puro {po} de {pq} = "
+              f"{100 * po / max(1, pq):.2f}%")
         if pct_f < META_A_FONTE_PCT:
             falhas_fonte.append(f"(A) fonte {fonte_nome} {pct_f:.2f}% (meta {META_A_FONTE_PCT}%)")
-    print(f"(A) lances abaixo de 99% (informativo):")
+    print("(A) lances com ok puro abaixo de 99% (cada quadro excecionado tem evidencia original):")
     for x in abaixo99:
         print(f"  {x}")
-    print(f"TOTAL (B): {tot_b_ruins} de {tot_b_dom} quadros com bola andando 0,5-9 m/s estao a mais de {a.limite} m "
-          f"de qualquer jogador ({100 * tot_b_ruins / max(1, tot_b_dom):.1f}%)")
-    print(f"excecoes de (A), dentro do denominador, por motivo: {excl_total or '-'}")
-    print(f"fora da meta (A) por lance (abaixo de {META_A_LANCE_PCT}% sem motivo): {len(falhas_a)}" + ("".join(f"\n  {x}" for x in falhas_a)))
-    print(f"fora da meta por fonte: {len(falhas_fonte)}" + ("".join(f"\n  {x}" for x in falhas_fonte)))
+    print(f"excecoes de (A), por quadro, por motivo: {excl_total or '-'}")
+    print(f"fora da meta (A) por lance (abaixo de 99% com excecoes): {len(falhas_a)}"
+          + "".join(f"\n  {x}" for x in falhas_a))
+    print(f"fora da meta por fonte: {len(falhas_fonte)}" + "".join(f"\n  {x}" for x in falhas_fonte))
     pct_b_total = 100 * tot_b_ruins / max(1, tot_b_dom)
-    print(f"(B) total {pct_b_total:.2f}% (meta: nao piorar alem de {META_B_TOTAL_PCT}%); lances com (B) fora da meta: {len(falhas_b)} (informativo)")
+    print(f"TOTAL (B): {tot_b_ruins} de {tot_b_dom} quadros com bola andando 0,5-9 m/s estao a mais de {a.limite} m "
+          f"de qualquer jogador ({pct_b_total:.2f}%); meta: {META_B_TOTAL_PCT}%; lances com (B) fora da meta: "
+          f"{len(falhas_b)} (informativo)")
     falhas_total = [] if pct_b_total <= META_B_TOTAL_PCT else [f"(B) total {pct_b_total:.2f}%"]
     return 1 if (falhas_a or falhas_fonte or falhas_total) else 0
 

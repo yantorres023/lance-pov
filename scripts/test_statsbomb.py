@@ -39,17 +39,17 @@ import math
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import evidencia as EV  # noqa: E402
+
 RAIZ = Path(__file__).resolve().parent.parent
 JSON_PATH = RAIZ / "web" / "data" / "hypados.json"
 CACHE_EVENTOS = RAIZ / "data" / "raw" / "statsbomb" / "data" / "events"
 POSSE_DIR = RAIZ / "data" / "posse"
 FPS = 20
 LINHA_GOL = 52.5
-A_LIMITE_M = 0.9
-A_META_FONTE_PCT = 99.0   # % (A) da fonte inteira (denominador integral)
-A_META_LANCE_PCT = 95.0   # % (A) de cada lance: abaixo disso, so passa com motivo de dado listado
-# motivos de dado (conflito do dado registrado): aceitos por lance abaixo de A_META_LANCE_PCT
-MOTIVOS_DADO = ("bola em voo", "atraso apos conflito de velocidade", "atraso ate 0,5 s depois de bola em voo",
+A_LIMITE_M = EV.A_LIMITE_M
+_MOTIVOS_ANTIGOS = ("bola em voo", "atraso apos conflito de velocidade", "atraso ate 0,5 s depois de bola em voo",
                 "evento fora da cadeia de bola")
 
 
@@ -295,11 +295,8 @@ def main():
         # (d)
         if len(jogs) < 8:
             falha(l, f"so {len(jogs)} jogadores (minimo 8)")
-        # (c)
+        # (c): nenhum jogador passa de 10,5 m/s na trajetoria final (teste estrito, sem excecao)
         vmax_j = 0.0
-        # (c): 10,5 m/s. Entre dois eventos com bola, um trecho que o dado pede mais rapido (registrado em
-        # data/posse/statsbomb.json, ate 11,5 m/s, com janela de atraso depois) e a unica excecao.
-        janelas_c = janelas_de(posse_meta_full, l["id"])
         for j in jogs:
             p = j["pos"]
             for i in range(1, len(p)):
@@ -308,12 +305,10 @@ def main():
                 v_i = math.dist(p[i], p[i - 1]) * FPS
                 vmax_j = max(vmax_j, v_i)
                 if v_i > 10.5 + 1e-6:
-                    registrado = any(pid_ == j["id"] and a_ <= i / FPS <= b_ for pid_, a_, b_, _ in janelas_c)
-                    if not registrado or v_i > 11.5 + 1e-6:
-                        falha(l, f"jogador {j['nome']} a {v_i:.2f} m/s no quadro {i} (max 10,5; excecao registrada ate 11,5)")
-                        break
-        if vmax_j > 11.5 + 1e-6:
-            falha(l, f"jogador a {vmax_j:.2f} m/s (max 11,5 mesmo em trecho registrado)")
+                    falha(l, f"jogador {j['nome']} a {v_i:.2f} m/s no quadro {i} (max 10,5)")
+                    break
+        if vmax_j > 10.5 + 1e-6:
+            falha(l, f"jogador a {vmax_j:.2f} m/s (max 10,5)")
         vmax_b = 0.0
         for i in range(1, n):
             if bola[i] is None or bola[i - 1] is None:
@@ -413,37 +408,29 @@ def main():
         # (A) colagem: sobre os segmentos ORIGINAIS detectados (antes de qualquer recorte), cobertura integral.
         # Quadro acima de 0,9 m do dono vai para as excecoes, com motivo; continua no denominador.
         if l["id"] in posse_meta_full.get("originais", {}):  # so a fonte StatsBomb (Origi e medido no test_lastrow)
+            segs_o = [tuple(s) for s in posse_meta_full["originais"][l["id"]]]
+            bola_o = posse_meta_full.get("bola_original", {}).get(l["id"], bola)
+            dists_o = posse_meta_full.get("distancia_original", {}).get(l["id"], [])
             pos_jog = {j["id"]: j["pos"] for j in jogs}
-            tot_l = bons_l = 0
-            excecoes_l = collections.Counter()
-            janelas_l = janelas_de(posse_meta_full, l["id"])
-            for pid, a, b, *_ in posse_orig[l["id"]]:
-                for f in range(max(0, a), min(n - 1, b) + 1):
-                    tot_l += 1
-                    p_ = pos_jog.get(pid, [None] * n)[f]
-                    if p_ is None or bola[f] is None:
-                        excecoes_l["sem posicao"] += 1
-                        continue
-                    d_ = math.hypot(p_[0] - bola[f][0], p_[1] - bola[f][1])
-                    if d_ <= A_LIMITE_M:
-                        bons_l += 1
-                        continue
-                    mot_ = motivo_conflito(bola, n, pid, f, f / FPS, None, janelas_l)
-                    if not mot_:
-                        if f - a < FPS:
-                            mot_ = "entrada: dono ainda chegando (1 s do inicio do segmento original)"
-                        elif b - f < FPS:
-                            mot_ = "saida: dono ja se afastou (1 s do fim do segmento original)"
-                        else:
-                            mot_ = "sem motivo"
-                    excecoes_l[mot_] += 1
-            a_total += tot_l
-            a_bons += bons_l
-            pct_l = 100 * bons_l / max(1, tot_l)
-            resumo_a.append((l["ordem"], l["titulo"], bons_l, tot_l, pct_l, dict(excecoes_l)))
-            if tot_l and pct_l < A_META_LANCE_PCT and not any(k in MOTIVOS_DADO for k in excecoes_l):
-                falha(l, f"colagem (A) real {pct_l:.2f}% sem motivo de dado ({bons_l}/{tot_l} quadros originais a "
-                         f"ate {A_LIMITE_M} m); excecoes: {dict(excecoes_l)}")
+            janelas_ev = {}
+            for pid_, ta, tb, _ in janelas_de(posse_meta_full, l["id"]):
+                janelas_ev.setdefault(pid_, []).append((ta, tb))
+
+            def pos_fn(pid, f, pos_jog=pos_jog, n=n):
+                p_ = pos_jog.get(pid, [None] * n)[f]
+                return None if p_ is None else (p_[0], p_[1])
+
+            def bola_fn(f, bola=bola):
+                return bola[f]
+
+            r = EV.avaliar(FPS, n, segs_o, dists_o, pos_fn, bola_fn, bola_o, janelas_ev)
+            a_total += r["tot"]
+            a_bons += r["ok"] + sum(r["justificados"].values())
+            resumo_a.append((l["ordem"], l["titulo"], r["pct_just"], r["pct_ok"], r["tot"], dict(r["justificados"]),
+                             dict(r["exemplos"])))
+            if r["pct_just"] < EV.A_META_LANCE_PCT:
+                falha(l, f"colagem (A) {r['pct_just']:.2f}% sem evidencia original em {len(r['falhas'])} quadros: "
+                         f"{[(p_, f_, d_) for p_, f_, d_, _ in r['falhas'][:4]]}")
         resumo.append(f"{l['ordem']:>2} {l['titulo']:<36} frames={n:<4} jog={len(jogs):<3} "
                       f"v_jog={vmax_j:5.2f} v_bola={vmax_b:5.1f} dist_fin={'-' if dist_a is None else f'{dist_a:.2f}'} "
                       f"corr_fin={'bola_parada' if caminho is None else f'{caminho:5.1f}m'} "
@@ -474,11 +461,12 @@ def main():
     print("\n".join(resumo))
     print(f"    (A) colagem real (segmentos originais, denominador integral): {a_bons} de {a_total} quadros a ate "
           f"{A_LIMITE_M} m do dono ({100 * a_bons / max(1, a_total):.2f}%)")
-    for ordem_a, tit_a, bons_a, tot_a, pct_a, exc_a in resumo_a:
-        if tot_a and pct_a < 99.0:
-            print(f"      (A) abaixo de 99% {ordem_a} {tit_a}: {pct_a:.2f}% ({bons_a}/{tot_a}); excecoes: {exc_a}")
-    if a_total and 100 * a_bons / a_total < A_META_FONTE_PCT:
-        falhas.append(f"(A) fonte StatsBomb {100 * a_bons / a_total:.2f}% (meta {A_META_FONTE_PCT}%)")
+    for ordem_a, tit_a, pct_j, pct_o, tot_a, exc_a, ex_a in resumo_a:
+        if tot_a and pct_o < 99.0:
+            print(f"      (A) {ordem_a} {tit_a}: ok {pct_o:.2f}%; excecoes por quadro: "
+                  + "; ".join(f"{k}={v} (ex.: {ex_a[k]})" for k, v in exc_a.items()))
+    if a_total and 100 * a_bons / a_total < EV.A_META_FONTE_PCT:
+        falhas.append(f"(A) fonte StatsBomb {100 * a_bons / a_total:.2f}% (meta {EV.A_META_FONTE_PCT}%)")
     ef, ec, st_e = checar_eventos(lances, posse_meta_full)
     falhas.extend(ef)
     ev_tot, ev_ok = st_e["ev_tot"], st_e["ev_ok"]

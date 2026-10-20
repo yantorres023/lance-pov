@@ -332,10 +332,13 @@ def _fixar(xy, limite):
 # ---------------------------------------------------------------- posse original e correcao da bola
 CONTATO_M = 1.5           # m: jogador a esta distancia da bola (dados originais) conta como toque
 SAIDA_VEL = 10.3          # m/s: bola acima disso saiu do pe (fora da posse)
+PARADA_VEL = 0.3          # m/s: bola com velocidade original abaixo disso esta parada (preparacao de cobranca):
+                          # nao abre posse e nunca e movida
 LAG_M = 0.9               # m: dono a mais disso da bola, dentro da posse, esta atrasado (a bola vai ao pe)
 PE_M = 0.45               # m: pe do dono, a frente, na direcao do movimento
-VEL_BOLA_CORR_MAX = 35.0  # m/s: limite da bola depois da correcao (roteiros testam 38)
-RAMPA_PE_FATOR = 25.0     # m/s: rampa da bola de (salto * fps / FATOR) quadros, no minimo 2
+ENTRADA_S = 0.5           # s: chegada do dono ao inicio da posse (quadros sem correcao, evidencia no dado original)
+VMAX_BOLA = 10.3          # m/s: a correcao nao cria velocidade da bola acima disso onde a original estava abaixo
+LINHA_GOL_X = 52.5        # m: bola alem da linha de gol: a partir dali nada abre posse e a bola nao muda
 
 
 def _vel_bola(bola, i, fps):
@@ -346,22 +349,42 @@ def _vel_bola(bola, i, fps):
     return math.dist(bola[b][:2], bola[a][:2]) * fps / (b - a)
 
 
-def segmentos_originais(fps, bola, jogadores, z_max=None, candidatos=None):
+def _vel_quadros(bola, f, fps):
+    """Velocidade consecutiva (quadro f-1 para f), a mesma que o visualizador interpola."""
+    if f <= 0 or f >= len(bola):
+        return 0.0
+    return math.dist(bola[f][:2], bola[f - 1][:2]) * fps
+
+
+def congelamento(bola):
+    """Quadro a partir do qual nada e tocado: dois quadros antes do primeiro quadro com a bola alem da linha de gol
+    (assim o par de quadros que define o cruzamento fica igual ao original). Sem cruzamento: len(bola)."""
+    for f in range(len(bola)):
+        if abs(bola[f][0]) > LINHA_GOL_X:
+            return max(0, f - 2)
+    return len(bola)
+
+
+def segmentos_originais(fps, bola, jogadores, z_max=None, candidatos=None, inicio=0, tomadas=None, times=None):
     """Posse ORIGINAL, antes de qualquer correcao: lista de (pid, ini, fim, tipo), extremos inclusivos.
 
-    Sem candidatos (Last-Row, roteiros): comeca no primeiro quadro em que um jogador esta a ate CONTATO_M da bola
-    (o toque). Com candidatos (StatsBomb): comeca no instante do evento (candidato), ou no primeiro quadro sem bola
-    em voo depois dele; aqui so o fim e definido.
-    Termina quando a bola sai do pe: (a) bola acima de SAIDA_VEL (ou no ar, z > z_max): o ultimo quadro e o
-    anterior a saida; (b) outro jogador toca a bola: o fim e o ultimo quadro do dono a ate CONTATO_M antes do
-    toque. Quadros de chegada (antes do toque) e de bola em voo (depois da saida) nao sao posse, e nem os
-    quadros de bola solta entre um dono e o toque seguinte. Na posse de evento (StatsBomb) o evento e a verdade:
-    a conducao continua mesmo com o dono atrasado."""
+    Sem candidatos (Last-Row, roteiros): a posse abre no primeiro quadro, a partir de `inicio`, em que um jogador
+    esta a ate CONTATO_M da bola, a bola se move (velocidade original >= PARADA_VEL) e nao esta no ar.
+    Termina quando a bola sai do pe: (a) bola acima de SAIDA_VEL (ou no ar, z > z_max); o ultimo quadro e o
+    anterior a saida; (b) outro jogador toca a bola: o fim e o ultimo quadro do dono a ate CONTATO_M antes do toque.
+    Com candidatos (StatsBomb): o inicio e o do candidato (evento: conducao, passe, drible, chute, recebimento);
+    o fim e a saida da bola ou um EVENTO EFETIVO de adversario em `tomadas` ([(quadro, time)], com `times` pid->time).
+    Proximidade de jogador nunca encerra posse de evento (posicao estimada nao comprova toque).
+    Quadros a partir de congelamento(bola) nao abrem nem continuam posse. Chute nao sofre corte de velocidade."""
     n = len(bola)
     sb = [_vel_bola(bola, i, fps) for i in range(n)]
+    cong = congelamento(bola)
 
     def no_pe(f):
         return sb[f] <= SAIDA_VEL and (z_max is None or bola[f][2] <= z_max)
+
+    def parada(f):
+        return sb[f] < PARADA_VEL
 
     def contato(pid, f):
         p = jogadores[pid][f]
@@ -381,8 +404,10 @@ def segmentos_originais(fps, bola, jogadores, z_max=None, candidatos=None):
             dono = None
 
         for f in range(n):
+            if f >= cong:
+                break
             if dono is None:
-                if no_pe(f):
+                if f >= inicio and no_pe(f) and not parada(f):
                     cs = [p for p in jogadores if contato(p, f)]
                     if cs:
                         dono, a, ult = mais_perto(cs, f), f, f
@@ -393,71 +418,127 @@ def segmentos_originais(fps, bola, jogadores, z_max=None, candidatos=None):
             if contato(dono, f):
                 ult = f
                 continue
-            outros = [p for p in jogadores if p != dono and contato(p, f)]
-            if outros:
+            outros = [p for p in jogadores if p != dono and contato(p, f) and f >= inicio]
+            if outros and not parada(f):
                 fecha(ult)
                 dono, a, ult = mais_perto(outros, f), f, f
-        fecha(n - 1)
+        fecha(min(n - 1, cong - 1))
         return out
 
     for pid, a, b, tipo in sorted(candidatos, key=lambda s: (s[1], s[2])):
-        ini = a
+        b = min(b, cong - 1)
+        ini = max(a, inicio)
         while ini <= b and not no_pe(ini):
             ini += 1
         if ini > b:
             continue
-        fim, ult = b, None
-        for f in range(ini, b + 1):  # evento com bola (conducao, drible, passe, chute): so a saida e o toque de outro
+        fim = b
+        for f in range(ini, b + 1):
             if not no_pe(f):
                 fim = f - 1
                 break
-            if contato(pid, f):
-                ult = f
-                continue
-            if any(contato(q, f) for q in jogadores if q != pid):
-                fim = (ult if ult is not None else f - 1)
+            if tomadas and times and any(fr == f and tm != times.get(pid) for fr, tm in tomadas):
+                fim = f - 1
                 break
         if fim >= ini:
             out.append((pid, ini, fim, tipo))
     return out
 
 
+def _direcao_pe(pts, bola, fps, f):
+    """Sentido para onde fica o pe do dono no quadro f: o movimento dele; se ele esta quase parado, o movimento
+    da bola (que ele conduz). Se esse sentido aponta para longe da bola (dono andando de costas para ela), usa
+    a direcao do dono para a bola: o pe nunca fica do outro lado da bola. Sem nada disso, (1, 0)."""
+    to_bola = None
+    if pts[f] is not None:
+        dx, dy = bola[f][0] - pts[f][0], bola[f][1] - pts[f][1]
+        if math.hypot(dx, dy) > 0.2:
+            m = math.hypot(dx, dy)
+            to_bola = (dx / m, dy / m)
+    u = None
+    v = _vel(pts, f, fps)
+    if v is not None and math.hypot(*v) >= VEL_JOG_MIN:
+        m = math.hypot(*v)
+        u = (v[0] / m, v[1] / m)
+    if u is None:
+        n = len(bola)
+        a, b = max(0, f - 1), min(n - 1, f + 1)
+        if b > a:
+            vx = (bola[b][0] - bola[a][0]) * fps / (b - a)
+            vy = (bola[b][1] - bola[a][1]) * fps / (b - a)
+            if math.hypot(vx, vy) >= 1.0:
+                m = math.hypot(vx, vy)
+                u = (vx / m, vy / m)
+    if u is None:
+        u = to_bola or (1.0, 0.0)
+    if to_bola is not None and u[0] * to_bola[0] + u[1] * to_bola[1] < 0.7:
+        u = to_bola
+    return u
+
+
 def _pe_xy(jogadores, sent, pid, f, b, lim=None):
     """Ponto do pe do dono no quadro f (f > b: mantem o ultimo quadro da posse); None se faltar dado.
-    lim (lx, ly): o ponto fica dentro do retangulo (a bola nao sai do campo nem cruza a linha de gol pela correcao)."""
+    sent: {pid: funcao(f) -> sentido}. lim (lx, ly): o ponto fica dentro do retangulo."""
     g = min(f, b)
     p = jogadores[pid][g]
     if p is None:
         return None
-    u = sent[pid][g] or (1.0, 0.0)
+    u = sent[pid](g)
     x, y = p[0] + PE_M * u[0], p[1] + PE_M * u[1]
     if lim is not None:
         x, y = min(max(x, -lim[0]), lim[0]), min(max(y, -lim[1]), lim[1])
     return (x, y)
 
 
-def bola_no_pe(fps, bola, jogadores, segmentos, lim=None):
+def bola_no_pe(fps, bola, jogadores, segmentos, lim=None, inicio=0):
     """Correcao da bola (Last-Row e roteiros). Dentro de cada posse, nos quadros em que o dono esta atrasado
-    (a mais de LAG_M da bola), a bola vai ao pe dele: PE_M a frente, no sentido do movimento. A bola entra
-    e sai por rampa (a entrada usa so quadros da posse; a saida pode passar do fim, para a bola voltar ao
-    caminho original). Rampa de (salto * fps / RAMPA_PE_FATOR) quadros, no minimo 2; se a velocidade da bola
-    passar de VEL_BOLA_CORR_MAX, a rampa aumenta. Os jogadores nao mudam.
-    lim (lx, ly), opcional: o pe-alvo fica dentro desse retangulo (a bola nao sai do campo pela correcao).
-    Devolve (bola_nova [[x, y, z], ...], relatorio)."""
+    (a mais de LAG_M da bola), a bola vai ao pe dele: PE_M a frente, no sentido do movimento. Regras:
+    - so se move bola em movimento (velocidade original entre PARADA_VEL e SAIDA_VEL), a partir de `inicio`
+      e antes de congelamento(bola) (depois da linha de gol). Bola parada (preparacao de cobranca) nunca e movida;
+    - a rampa entra e sai da posse por quadros em movimento, no maximo ENTRADA_S antes do contato e ENTRADA_S
+      depois; a rampa cresce ate a velocidade caber: a correcao nao cria velocidade acima de
+      max(VMAX_BOLA, velocidade original). Onde nao cabe, o trecho encolhe;
+    - o que sobra acima de LAG_M fica como excecao por quadro (evidencia: distancia do dado original);
+    - os jogadores nao mudam.
+    lim (lx, ly): o pe-alvo fica dentro desse retangulo. Devolve (bola_nova [[x, y, z], ...], relatorio)."""
     n = len(bola)
-    nova = [[float(b[0]), float(b[1]), float(b[2])] for b in bola]
-    sent = {pid: _sentidos_jogador(pts, fps) for pid, pts in jogadores.items()}
-    original = [list(b) for b in nova]
-    rel = {"segmentos_com_correcao": 0, "vel_excedida": 0, "atrasos_restantes": 0}
+    original = [[float(b[0]), float(b[1]), float(b[2])] for b in bola]
+    nova = [list(b) for b in original]
+    sent = {pid: (lambda g, pts=pts: _direcao_pe(pts, bola, fps, g)) for pid, pts in jogadores.items()}
+    cong = congelamento(bola)
+    a_min = min((a for _, a, _, _ in segmentos), default=n)
+    inicio_ok = max(inicio, 0)
+    rampa_max = max(2, round(ENTRADA_S * fps))
 
-    def vel_frames(seq, lo, hi):
-        return max((math.dist(seq[f][:2], seq[f - 1][:2]) * fps for f in range(max(1, lo), min(n - 1, hi) + 1)),
-                   default=0.0)
+    def movendo(f):
+        return inicio_ok <= f < cong and PARADA_VEL <= _vel_bola(bola, f, fps) <= SAIDA_VEL
 
-    for pid, a, b, tipo in sorted(segmentos, key=lambda s: (s[1], s[2])):
+    rel = {"segmentos_com_correcao": 0, "vel_excedida": 0, "atrasos_restantes": 0, "congelado_a_partir": cong,
+           "entrada_nao_corrigida": 0, "saida_nao_corrigida": 0, "recusados": []}
+
+    # Peso da correcao e alvo do pe por quadro. Cada quadro e calculado UMA vez, a partir do original:
+    # a bola = original + W * (alvo - original), com W o maior peso entre os trechos que o afetam.
+    W = [0.0] * n
+    T = [None] * n
+
+    def posicao(f, w, t):
+        ox, oy = original[f][0], original[f][1]
+        return (ox + w * (t[0] - ox), oy + w * (t[1] - oy))
+
+    def viola(tmp, lo, hi):
+        for g in range(max(1, lo), min(n - 1, hi + 1) + 1):
+            if _vel_quadros(tmp, g, fps) > max(VMAX_BOLA, _vel_quadros(original, g, fps)) + 1e-6:
+                return g
+        return None
+
+    ordem = sorted(segmentos, key=lambda s: (s[1], s[2]))
+    for k, (pid, a, b, tipo) in enumerate(ordem):
         pts = jogadores[pid]
+        # rampa so em quadros livres: entre o fim da posse anterior e o inicio da seguinte (nao cruza outro dono)
+        livre_ini = ordem[k - 1][2] + 1 if k > 0 else 0
+        livre_fim = ordem[k + 1][1] - 1 if k + 1 < len(ordem) else n - 1
         lag = [f for f in range(a, b + 1)
-               if pts[f] is not None and math.dist(pts[f], nova[f][:2]) > LAG_M]
+               if movendo(f) and pts[f] is not None and math.dist(pts[f], nova[f][:2]) > LAG_M]
         grupos = []
         for f in lag:
             if grupos and f == grupos[-1][1] + 1:
@@ -467,45 +548,75 @@ def bola_no_pe(fps, bola, jogadores, segmentos, lim=None):
         if grupos:
             rel["segmentos_com_correcao"] += 1
         for s, e in grupos:
-            alvo_s = _pe_xy(jogadores, sent, pid, s, b, lim)
-            alvo_e = _pe_xy(jogadores, sent, pid, e, b, lim)
-            if alvo_s is None or alvo_e is None:
-                continue
-            J = math.dist(nova[s][:2], alvo_s)
-            J2 = math.dist(alvo_e, nova[e + 1][:2]) if e + 1 < n else 0.0
-            fator = 1.0
-            for _ in range(5):
-                kp = min(max(2, math.ceil(J * fps / RAMPA_PE_FATOR * fator)) if J > 1e-9 else 0, s)
-                kq = max(2, math.ceil(J2 * fps / RAMPA_PE_FATOR * fator)) if J2 > 1e-9 else 0
-                lo, hi = s - kp, e + kq
-                tmp = [list(x) for x in nova]
-                for f in range(lo, hi + 1):
-                    if f < 0 or f >= n:
-                        continue
-                    if s <= f <= e:
-                        w = 1.0
-                    elif f < s:
-                        w = (f - lo + 1) / (kp + 1)
-                    else:
-                        w = 1.0 - (f - e) / (kq + 1)
-                    alvo = _pe_xy(jogadores, sent, pid, f, b, lim)
-                    if alvo is None:
-                        continue
-                    x0, y0 = tmp[f][0], tmp[f][1]
-                    tmp[f][0] = x0 + w * (alvo[0] - x0)
-                    tmp[f][1] = y0 + w * (alvo[1] - y0)
-                if vel_frames(tmp, lo - 1, hi + 1) <= VEL_BOLA_CORR_MAX or fator >= 4.0:
+            feito = False
+            while s <= e and not feito:
+                alvo_s = _pe_xy(jogadores, sent, pid, s, b, lim)
+                alvo_e = _pe_xy(jogadores, sent, pid, e, b, lim)
+                if alvo_s is None or alvo_e is None:
                     break
-                fator *= 1.5
-            if vel_frames(tmp, lo - 1, hi + 1) > VEL_BOLA_CORR_MAX:
+                J = math.dist(nova[s][:2], alvo_s)
+                J2 = math.dist(alvo_e, nova[e + 1][:2]) if e + 1 < n else 0.0
+                disp_pre = 0  # quadros em movimento, livres, antes e depois do trecho
+                while disp_pre < rampa_max and s - disp_pre - 1 >= livre_ini and movendo(s - disp_pre - 1):
+                    disp_pre += 1
+                disp_pos = 0
+                while disp_pos < rampa_max and e + disp_pos + 1 <= livre_fim and movendo(e + disp_pos + 1):
+                    disp_pos += 1
+                fator = 1.0
+                ok = False
+                for _ in range(6):
+                    kp = min(math.ceil(J * fps / VMAX_BOLA * fator) if J > 1e-9 else 0, disp_pre)
+                    kq = min(math.ceil(J2 * fps / VMAX_BOLA * fator) if J2 > 1e-9 else 0, disp_pos)
+                    lo, hi = s - kp, e + kq
+                    W2, T2 = list(W), list(T)
+                    for f in range(lo, hi + 1):
+                        if not (movendo(f) or s <= f <= e):
+                            continue
+                        if s <= f <= e:
+                            w = 1.0
+                        elif f < s:
+                            w = (f - lo + 1) / (kp + 1)
+                        else:
+                            w = 1.0 - (f - e) / (kq + 1)
+                        alvo = _pe_xy(jogadores, sent, pid, f, b, lim)
+                        if alvo is None:
+                            continue
+                        if w > W2[f]:
+                            W2[f], T2[f] = w, alvo
+                    tmp = [list(x) for x in nova]
+                    for f in range(lo, hi + 1):
+                        if T2[f] is not None and W2[f] > 0:
+                            tmp[f][0], tmp[f][1] = posicao(f, W2[f], T2[f])
+                    if viola(tmp, lo, hi) is None:
+                        ok = True
+                        break
+                    fator *= 1.5
+                if ok:
+                    W, T, nova = W2, T2, tmp
+                    feito = True
+                elif s < e:
+                    e -= 1  # encolhe o trecho corrigido pela saida: o resto vira excecao por quadro
+                else:
+                    s += 1
+            if not feito:
                 rel["vel_excedida"] += 1
-            nova = tmp
         for f in range(a, b + 1):
             if pts[f] is not None and math.dist(pts[f], nova[f][:2]) > LAG_M:
                 rel["atrasos_restantes"] += 1
+                if f < a + max(1, round(ENTRADA_S * fps)):
+                    rel["entrada_nao_corrigida"] += 1
+                elif f > b - max(1, round(ENTRADA_S * fps)):
+                    rel["saida_nao_corrigida"] += 1
+                # motivo registrado pelo gerador (conferido pelo teste contra o dado original)
+                if _vel_bola(bola, f, fps) < PARADA_VEL:
+                    rel["recusados"].append((pid, f, "parada"))
+                elif movendo(f):
+                    rel["recusados"].append((pid, f, "limite_velocidade"))
+                else:
+                    rel["recusados"].append((pid, f, "outra"))
 
     movidos = [f for f in range(n) if math.dist(nova[f][:2], original[f][:2]) > 1e-9]
     rel["quadros_movidos"] = len(movidos)
     rel["deslocamento_max"] = round(max((math.dist(nova[f][:2], original[f][:2]) for f in movidos), default=0.0), 3)
-    rel["vel_max"] = round(vel_frames(nova, 0, n - 1), 2)
+    rel["vel_max"] = round(max((_vel_quadros(nova, g, fps) for g in range(1, n)), default=0.0), 2)
     return [[round(x, 3), round(y, 3), round(z, 3)] for x, y, z in nova], rel

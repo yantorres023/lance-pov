@@ -165,7 +165,9 @@ def _colar_jogadores(dur, bola, nomes, toques, lance_id=""):
     n = round(dur * FPS) + 1
     bola_q = [list(_bola_em(bola, f / FPS)) for f in range(n)]
     pos = {j["pid"]: [list(_cr(j["chaves"], f / FPS)) for f in range(n)] for j in nomes}
-    segs = posse.segmentos_originais(FPS, bola_q, pos, z_max=Z_POSSE)
+    # nada abre posse nem e movido antes do primeiro toque conhecido (o toque da cobranca, quando houver)
+    inicio = min((round(t * FPS) for t, _ in toques), default=0)
+    segs = posse.segmentos_originais(FPS, bola_q, pos, z_max=Z_POSSE, inicio=inicio)
     for t1_, t2_ in EXCECAO_SEM_POSSE.get(lance_id, []):  # excecoes justificadas (ver EXCECAO_SEM_POSSE)
         e1, e2 = round((t1_ + 0.05) * FPS), round((t2_ - 0.05) * FPS)
         recortados = []
@@ -180,10 +182,16 @@ def _colar_jogadores(dur, bola, nomes, toques, lance_id=""):
         segs = recortados
     if not segs:
         return bola, {"runs": [], "originais": [], "quadros_movidos": 0, "deslocamento_max": 0.0,
-                      "vel_max": 0.0, "segmentos_com_correcao": 0, "atrasos_restantes": 0, "vel_excedida": 0}
-    nova, rel = posse.bola_no_pe(FPS, bola_q, pos, segs, lim=(52.4, 33.9))
+                      "vel_max": 0.0, "segmentos_com_correcao": 0, "atrasos_restantes": 0, "vel_excedida": 0,
+                      "bola_original": [[round(x, 3), round(y, 3), round(z, 3)] for x, y, z in bola_q],
+                      "distancia_original": [], "recusados_lista": []}
+    nova, rel = posse.bola_no_pe(FPS, bola_q, pos, segs, lim=(52.4, 33.9), inicio=inicio)
     rel["runs"] = segs
     rel["originais"] = segs  # segmentos da posse original, antes da correcao (auditoria)
+    rel["bola_original"] = [[round(x, 3), round(y, 3), round(z, 3)] for x, y, z in bola_q]
+    rel["recusados_lista"] = [[pid, f, k] for pid, f, k in rel.pop("recusados")]
+    rel["distancia_original"] = [[round(math.dist(pos[pid][f], bola_q[f][:2]), 3) if pos[pid][f] is not None else None
+                                  for f in range(a, b + 1)] for pid, a, b, *_ in segs]
     if rel["quadros_movidos"]:
         bola = _chaves_da_bola(bola, nova, bola_q)
     return bola, rel
@@ -556,8 +564,14 @@ def main():
     POSSE_SAIDA.parent.mkdir(parents=True, exist_ok=True)
     posse_lances = {d["id"]: [list(s) for s in m["posse_rel"]["runs"]] for d, m in gerados}
     posse_originais = {d["id"]: [list(s) for s in m["posse_rel"]["originais"]] for d, m in gerados}
+    bola_original = {d["id"]: m["posse_rel"]["bola_original"] for d, m in gerados}
+    distancia_original = {d["id"]: m["posse_rel"]["distancia_original"] for d, m in gerados}
+    recusados = {d["id"]: m["posse_rel"]["recusados_lista"] for d, m in gerados}
     with open(POSSE_SAIDA, "w", encoding="utf-8") as f:
-        json.dump({"fps": FPS, "lances": posse_lances, "originais": posse_originais}, f, ensure_ascii=False, indent=1)
+        json.dump({"fps": FPS, "lances": posse_lances, "originais": posse_originais,
+                   "bola_original": bola_original, "distancia_original": distancia_original,
+                   "recusados": recusados},
+                  f, ensure_ascii=False, indent=1)
         f.write("\n")
     for d, m in gerados:
         rel = m["posse_rel"]

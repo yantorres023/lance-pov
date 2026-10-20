@@ -27,6 +27,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import evidencia as EV  # noqa: E402
+
 RAIZ = Path(__file__).resolve().parent.parent
 SCRIPTS = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS))
@@ -385,62 +388,95 @@ def _teste_drible_da_vaca(meta, bola, por_id, f, stats):
                       f"reencontro em {t_re:.2f} s a {d_re:.2f} m")
 
 
-def checar_colagem(lances):
-    """(A): dono a até A_LIMITE_M da bola nos quadros ORIGINAIS de posse (mesma interpolação do visualizador)."""
+def cruzamento_amostrado(bola_fr, linha=52.5):
+    """Primeiro cruzamento de |x| > linha na amostragem por quadro: (instante em quadros, y, z) ou None."""
+    for f in range(1, len(bola_fr)):
+        x0, x1 = bola_fr[f - 1][0], bola_fr[f][0]
+        if abs(x1) > linha >= abs(x0):
+            s = (linha * math.copysign(1, x1) - x0) / (x1 - x0)
+            return (f - 1 + s, bola_fr[f - 1][1] + s * (bola_fr[f][1] - bola_fr[f - 1][1]),
+                    bola_fr[f - 1][2] + s * (bola_fr[f][2] - bola_fr[f - 1][2]))
+    return None
+
+
+TOL_BOLA_M = 0.035   # m: as chaves da bola sao reamostradas a 0,03 m do quadro corrigido
+
+
+def checar_colagem(lances, metas):
+    """(A) e (d)(e)(f) dos roteiros, sobre os segmentos ORIGINAIS da posse (data/posse/brasil.json).
+    (A): quadro a ate A_LIMITE_M do dono; excecao so por quadro, com evidencia no dado original.
+    (d) bola parada no original nunca e movida; (e) antes do primeiro toque, a bola e como no original;
+    (f) o cruzamento da linha de gol (instante e ponto) e igual ao original e a bola nao volta depois."""
     if not POSSE_PATH.exists():
-        print("(A) colagem dos roteiros: pendente (sem data/posse/brasil.json; roteiros nao sao colados)")
+        print("(A) colagem dos roteiros: pendente (sem data/posse/brasil.json)")
         return
     dados = json.loads(POSSE_PATH.read_text(encoding="utf-8"))
-    if "originais" not in dados:
-        checar(False, "data/posse/brasil.json sem 'originais' (rode roteiros_brasil.py)")
+    if "originais" not in dados or "bola_original" not in dados:
+        checar(False, "data/posse/brasil.json sem 'originais'/'bola_original' (rode roteiros_brasil.py)")
         return
-    originais = dados["originais"]
-    tot_geral = bons_geral = 0
-    excecoes_geral = {}
+    tot_geral = ok_geral = 0
+    just_geral = {}
     for l in lances:
-        segs = originais.get(l.get("id"), [])
+        lid = l.get("id")
+        segs = dados["originais"].get(lid, [])
         if not segs:
             continue
+        bola_o = dados["bola_original"][lid]
+        dists = dados["distancia_original"][lid]
+        rec = {(pid, f): k for pid, f, k in dados.get("recusados", {}).get(lid, [])}
         por_id = {j["id"]: j for j in l["jogadores"]}
-        tot = bons = 0
-        excecoes = {}
-        for pid, a, b, *_ in segs:
+        n = len(bola_o)
+
+        def pos_fn(pid, f):
             j = por_id.get(pid)
-            checar(j is not None, f"[{l['id']}] posse de {pid!r}, que nao existe")
             if j is None:
-                continue
-            for f in range(a, b + 1):
-                t = f / FPS
-                px, py = jogador_em(j["chaves"], t)
-                bx, by, _ = bola_em(l["chavesBola"], t)
-                tot += 1
-                if math.hypot(px - bx, py - by) <= A_LIMITE_M:
-                    bons += 1
-                    continue
-                x0, y0, _ = bola_em(l["chavesBola"], max(0.0, t - 1.0 / FPS))
-                v = math.hypot(bx - x0, by - y0) * FPS
-                if v > VMAX_BOLA_CORTE:
-                    motivo = "bola em voo"
-                elif f - a < FPS:
-                    motivo = "entrada: dono ainda chegando (1 s do inicio do segmento original)"
-                elif b - f < FPS:
-                    motivo = "saida: dono ja se afastou (1 s do fim do segmento original)"
-                else:
-                    motivo = "sem motivo"
-                excecoes[motivo] = excecoes.get(motivo, 0) + 1
-        tot_geral += tot
-        bons_geral += bons
-        for k, v in excecoes.items():
-            excecoes_geral[k] = excecoes_geral.get(k, 0) + v
-        if tot and 100 * bons / tot < A_META_LANCE_PCT and not any(k in MOTIVOS_DADO for k in excecoes):
-            checar(False, f"[{l['id']}] colagem (A) real {100 * bons / tot:.2f}% sem motivo de dado ({bons}/{tot} "
-                          f"quadros originais a ate {A_LIMITE_M} m); excecoes: {excecoes or '-'}")
-        elif tot and 100 * bons / tot < 99.0:
-            print(f"  (A) abaixo de 99% {l['id']}: {100 * bons / tot:.2f}% ({bons}/{tot}); excecoes: {excecoes}")
-    print(f"(A) colagem dos roteiros (originais, denominador integral): {bons_geral} de {tot_geral} quadros a ate "
-          f"{A_LIMITE_M} m do dono ({100 * bons_geral / max(1, tot_geral):.2f}%); excecoes: {excecoes_geral or '-'}")
-    checar(bons_geral * 100 >= A_META_FONTE_PCT * tot_geral,
-           f"(A) fonte roteiros {100 * bons_geral / max(1, tot_geral):.2f}% (meta {A_META_FONTE_PCT}%)")
+                return None
+            return jogador_em(j["chaves"], f / FPS)
+
+        def bola_fn(f):
+            return bola_em(l["chavesBola"], f / FPS)
+
+        bola_c = [bola_fn(f) for f in range(n)]
+        r = EV.avaliar(FPS, n, [tuple(s) for s in segs], dists, pos_fn, bola_fn, bola_o, {}, rec)
+        tot_geral += r["tot"]
+        ok_geral += r["ok"] + sum(r["justificados"].values())
+        for k, v in r["justificados"].items():
+            just_geral[k] = just_geral.get(k, 0) + v
+        if r["pct_ok"] < 99.0:
+            print(f"  (A) {lid}: ok {r['pct_ok']:.2f}%; excecoes por quadro: "
+                  + "; ".join(f"{k}={v} (ex.: {r['exemplos'][k]})" for k, v in r["justificados"].items()))
+        if r["pct_just"] < EV.A_META_LANCE_PCT:
+            checar(False, f"[{lid}] colagem (A) {r['pct_just']:.2f}% < {EV.A_META_LANCE_PCT}%; sem evidencia "
+                          f"original em {len(r['falhas'])} quadros: {[(p, f, d) for p, f, d, _ in r['falhas'][:4]]}")
+        # (d) bola parada e (e) antes do primeiro toque
+        t_toque = min((round(t * FPS) for t, _ in metas[lid]["toques"]), default=0) if lid in metas else 0
+        for f in range(n):
+            moved = max(abs(bola_c[f][0] - bola_o[f][0]), abs(bola_c[f][1] - bola_o[f][1]))
+            if EV.vel_original(bola_o, f, FPS) < EV.PARADA_VEL and moved > TOL_BOLA_M:
+                checar(False, f"[{lid}] bola parada no original movida no quadro {f} ({moved:.2f} m)")
+                break
+        for f in range(0, t_toque):
+            moved = max(abs(bola_c[f][0] - bola_o[f][0]), abs(bola_c[f][1] - bola_o[f][1]))
+            if moved > TOL_BOLA_M:
+                checar(False, f"[{lid}] bola mudou antes do primeiro toque (quadro {f}: {moved:.2f} m)")
+                break
+        # (f) gol
+        co, cc = cruzamento_amostrado(bola_o), cruzamento_amostrado(bola_c)
+        if co is not None:
+            fc = int(co[0])
+            # chaves no JSON com 2 casas (0,01 s e 0,01 m): o cruzamento e comparado nessa resolucao
+            checar(cc is not None and abs(cc[0] - co[0]) < 0.05 and math.dist(cc[1:], co[1:]) < 0.02,
+                   f"[{lid}] cruzamento da linha mudou: original {co}, corrigido {cc}")
+            for f in range(max(0, fc - 2), n):
+                moved = max(abs(bola_c[f][0] - bola_o[f][0]), abs(bola_c[f][1] - bola_o[f][1]))
+                if moved > TOL_BOLA_M:
+                    checar(False, f"[{lid}] bola mudou a partir da linha de gol (quadro {f}: {moved:.2f} m)")
+                    break
+    if tot_geral:
+        pct = 100.0 * ok_geral / tot_geral
+        print(f"(A) colagem dos roteiros (ok + excecoes com evidencia): {ok_geral} de {tot_geral} = {pct:.2f}%; "
+              f"excecoes por motivo: {just_geral or '-'}")
+        checar(pct >= EV.A_META_FONTE_PCT, f"(A) fonte roteiros {pct:.2f}% (meta {EV.A_META_FONTE_PCT}%)")
 
 
 def main():
@@ -466,7 +502,7 @@ def main():
             continue
         tabela.append(testar_lance(l, meta))
 
-    checar_colagem(lances)
+    checar_colagem(lances, metas)
     print(f"{'#':>2}  {'id':<48} {'dur':>5} {'jog':>3} {'bola':>4} {'toq':>3} {'v_jog':>6} {'v_bola':>6}")
     for s in tabela:
         extra = f"  barreira={s['barreira']}" if "barreira" in s else ""

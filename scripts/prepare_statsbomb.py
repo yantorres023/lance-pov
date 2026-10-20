@@ -609,6 +609,24 @@ def cadeia_bola(eventos, gol, gol_team, desde):
                           "mesmo_instante": sorted(desl_eids)}
 
 
+TIPOS_TOMADA = ("Interception", "Ball Recovery", "Clearance", "Block", "Duel", "50/50")
+
+
+def tomada_efetiva(e):
+    """Evento que tira a bola do adversario (quem tinha a bola perde): desarme ganho, interceptacao, recuperacao,
+    corte, bloqueio. Perdas e disputas perdidas nao contam."""
+    typ = e["type"]["name"]
+    if typ not in TIPOS_TOMADA:
+        return False
+    if typ == "Ball Recovery":
+        return not (e.get("ball_recovery") or {}).get("failed")
+    if typ in ("Clearance", "Block"):
+        return True
+    chave = {"Interception": "interception", "Duel": "duel", "50/50": "50/50"}[typ]
+    desfecho = ((e.get(chave) or {}).get("outcome") or {}).get("name")
+    return desfecho in ("Won", "Success In Play", "Success Out", "Success")
+
+
 def segmentos_posse(wev, t0, frames):
     """Posse do StatsBomb em quadros: (id, ini, fim, tipo), extremos inclusivos.
     Conducao (Carry) de t a t + duration; drible +-0,3 s; recebimento (Ball Receipt) +-0,15 s;
@@ -1154,7 +1172,7 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
                                       d_max=12.0 if pid == cobrador_id else None)
             # Ancoras: o limitador so atua em trecho que pede mais que VMAX_ANCORA (conflito do dado: o
             # jogador chega atrasado ao evento seguinte, e o teste de eventos aponta isso).
-            serie, nc, corr = finalizar(pos_fn, pid, vmax=VMAX_ANCORA - 0.1)  # margem para o arredondamento
+            serie, nc, corr = finalizar(pos_fn, pid, vmax=VMAX_JOG - 0.05)  # 10,5 m/s, sem excecao; margem de arredondamento
             # Parado quase o tempo todo entre poucas ancoras: o caminho real fica, marcado como estimado
             # (a regra dos 80% nao substitui a trajetoria, so marca).
             estimado = parada(serie) > 0.8
@@ -1165,8 +1183,13 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
                 dt_ = b_[0] - a_[0]
                 v_ = math.hypot(b_[1] - a_[1], b_[2] - a_[2]) / dt_ if dt_ > 1e-6 else float("inf")
                 if v_ > VMAX_JOG + 1e-9:
-                    reg = {"pid": pid, "t_ini": round(a_[0] - t0, 2), "t_fim": round(b_[0] - t0, 2), "v": round(v_, 2)}
-                    (ancoras_conflito if v_ > VMAX_ANCORA else ancoras_vel).append(reg)
+                    # so o tempo entre duas ancoras de evento do MESMO jogador pode exigir mais que 10,5 m/s: o
+                    # jogador fica o mais perto possivel delas (sem passar de 10,5) e a distancia residual vai ao relatorio
+                    ib = min(max(round((b_[0] - t0) * FPS), 0), frames - 1)
+                    residual = math.dist(serie[ib], (b_[1], b_[2]))
+                    reg = {"pid": pid, "t_ini": round(a_[0] - t0, 2), "t_fim": round(b_[0] - t0, 2),
+                           "v": round(v_, 2), "residual_m": round(residual, 2)}
+                    ancoras_conflito.append(reg)
         elif not estimado:
             serie, nc, corr = finalizar(caminho_real(anc, eh_chutador), pid)
             if parada(serie) > 0.8:  # decidido na trajetoria final (apos prender ao campo e limitar velocidade)
@@ -1222,8 +1245,12 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
     pos_orig = {j["id"]: j["pos"] for j in jogadores}
     extra_recebidas = posses_nao_registradas(eventos_bola_janela, t0, frames, bola, pos_orig, segs, ids)
     # posse original (definicao comum): comeca no evento; termina quando a bola sai do pe (acima de 10,3 m/s)
-    # ou quando outro jogador toca a bola. Quadros de bola em voo nao sao posse. Feito antes da colagem.
-    segs = posse.segmentos_originais(FPS, bola, pos_orig, candidatos=segs + extra_recebidas)
+    # ou com evento efetivo de adversario (tomada). Proximidade de jogador (posicao estimada) nao encerra posse.
+    tomadas = [(round((tempo(e) - t0) * FPS), str(e["team"]["id"])) for e in wev
+               if e.get("team") and e.get("player") and tomada_efetiva(e)]
+    times = {pid: str(tid) for pid, tid in time_de.items()}
+    segs = posse.segmentos_originais(FPS, bola, pos_orig, candidatos=segs + extra_recebidas,
+                                     tomadas=tomadas, times=times)
     lim = {j["id"]: (GOLEIRO_LIM_X if j["goleiro"] else CAMPO_LIM_X, CAMPO_LIM_Y) for j in jogadores}
     novas, rel_posse = posse.colar(FPS, bola, {j["id"]: j["pos"] for j in jogadores}, segs,
                                    vmax=VMAX_LIMITE, lim=lim)
@@ -1231,21 +1258,11 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
         j["pos"] = [[round(x, 3), round(y, 3)] for x, y in novas[j["id"]]]
         if j["id"] in anc_pids and not j["estimado"] and parada(j["pos"]) > 0.8:
             j["estimado"] = True  # parado na trajetoria final (depois da colagem): marca, nao muda a posicao
-    # (c) quadro a quadro: trecho do jogador acima de VMAX_JOG depois da colagem fica registrado (ate 11,5 m/s);
-    # acima disso, o teste reprova.
-    for j in jogadores:
-        p_ = j["pos"]
-        i_ = 1
-        while i_ < len(p_):
-            if math.dist(p_[i_], p_[i_ - 1]) * FPS <= VMAX_JOG + 1e-6:
-                i_ += 1
-                continue
-            i0_, vmax_t = i_, 0.0
-            while i_ < len(p_) and math.dist(p_[i_], p_[i_ - 1]) * FPS > VMAX_JOG + 1e-6:
-                vmax_t = max(vmax_t, math.dist(p_[i_], p_[i_ - 1]) * FPS)
-                i_ += 1
-            ancoras_vel.append({"pid": j["id"], "t_ini": round((i0_ - 1) / FPS - 0.0, 2),
-                                "t_fim": round(i_ / FPS, 2), "v": round(vmax_t, 2)})
+    # diagnostico (nao dispensa nada): quadros de jogador acima de 10,5 m/s na trajetoria final
+    excesso = sum(1 for j in jogadores for i_ in range(1, len(j["pos"]))
+                  if math.dist(j["pos"][i_], j["pos"][i_ - 1]) * FPS > VMAX_JOG + 1e-6)
+    if excesso:
+        avisos.append(f"diagnostico: {excesso} quadros de jogador acima de 10,5 m/s na trajetoria final (teste reprova)")
     if rel_posse["vel_jogador"]:
         avisos.append(f"posse: {len(rel_posse['vel_jogador'])} quadros do jogador acima de 10,5 m/s (registrado)")
     if rel_posse["cortados_bola_rapida"]:
@@ -1261,9 +1278,12 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
     if ancoras_conflito:
         avisos.append(f"ancoras: {len(ancoras_conflito)} trechos acima de 11,5 m/s (conflito do dado)")
 
+    dist_orig = [[round(math.dist(pos_orig[q[0]][f], bola[f][:2]), 3) if pos_orig.get(q[0]) and
+                  pos_orig[q[0]][f] is not None else None for f in range(q[1], q[2] + 1)] for q in segs]
     return {
         "posse_runs": rel_posse["runs"], "posse_rel": rel_posse,
         "posse_originais": [(q[0], q[1], q[2]) for q in segs],
+        "distancia_original": dist_orig,
         "ancoras": {"vel": ancoras_vel, "conflito": ancoras_conflito},
         "frames": frames, "frameChute": n_pre, "bola": bola, "jogadores": jogadores,
         "finalizadorId": str(gol["player"]["id"]), "time_gol": nome_time[gol_team], "time_outro": nome_time[outro_id],
@@ -1410,6 +1430,8 @@ def main():
     relatorio = []
     posse_lances = {}
     posse_originais = {}  # segmentos detectados antes de qualquer recorte (medida (A) integral)
+    bola_original = {}  # bola da cadeia de eventos (sem correcao de bola)
+    distancia_original = {}  # distancia dono-bola nos dados originais, por segmento (evidencia das excecoes)
     posse_t0 = {}
     ancoras_lances = {}
     limitados_total = 0
@@ -1434,6 +1456,8 @@ def main():
         saida.append(lance)
         posse_lances[lance["id"]] = [list(s) for s in r["posse_runs"]]
         posse_originais[lance["id"]] = [list(s) for s in r["posse_originais"]]
+        bola_original[lance["id"]] = r["bola"]
+        distancia_original[lance["id"]] = r["distancia_original"]
         posse_t0[lance["id"]] = round(r["t0"], 4)
         ancoras_lances[lance["id"]] = dict(r["ancoras"], bola=[
             {"t_ini": round(c["t"] - r["t0"] - 0.3, 2), "t_fim": round(c["t"] - r["t0"] + 0.3, 2), "v": c["v"]}
@@ -1463,7 +1487,8 @@ def main():
     POSSE_SAIDA.parent.mkdir(parents=True, exist_ok=True)
     with open(POSSE_SAIDA, "w", encoding="utf-8") as f:
         json.dump({"fps": FPS, "lances": posse_lances, "originais": posse_originais, "t0": posse_t0,
-                   "ancoras": ancoras_lances},
+                   "ancoras": ancoras_lances, "bola_original": bola_original,
+                   "distancia_original": distancia_original},
                   f, ensure_ascii=False, indent=1)
         f.write("\n")
     print(f"posse gravada em {POSSE_SAIDA}")

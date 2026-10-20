@@ -190,11 +190,15 @@ def colar_lance(lance):
     esta atrasado dentro da posse, a BOLA vai ao pe dele (a bola deste lance e rastreada a mao). Os jogadores
     nao se movem. Devolve (segmentos originais, segmentos, relatorio)."""
     pos = {j["id"]: j["pos"] for j in lance["jogadores"]}
+    bola_orig = [[round(x, 3), round(y, 3), round(z, 3)] for x, y, z in lance["bola"]]
     segs = posse.segmentos_originais(lance["fps"], lance["bola"], pos, z_max=Z_POSSE_LR)
     nova, rel = posse.bola_no_pe(lance["fps"], lance["bola"], pos, segs,
                                  lim=(X_SIZE / 2 - 0.1, Y_SIZE / 2 - 0.1))
     lance["bola"] = nova
-    return segs, segs, rel
+    rel["recusados_lista"] = [[pid, f, k] for pid, f, k in rel.pop("recusados")]
+    dist_orig = [[round(math.dist(pos[pid][f], bola_orig[f][:2]), 3) if pos[pid][f] is not None else None
+                  for f in range(a, b + 1)] for pid, a, b, *_ in segs]
+    return segs, segs, rel, bola_orig, dist_orig
 
 
 def metros(x, y):
@@ -257,10 +261,16 @@ def main(origem, destino):
             saida.append(montar(t, lance["linhas"]))
     posse_lances = {}
     posse_originais = {}
+    bola_original = {}
+    distancia_original = {}
+    recusados = {}
     for l in saida:
-        originais, runs, rel = colar_lance(l)
+        originais, runs, rel, bola_orig, dist_orig = colar_lance(l)
+        recusados[l["id"]] = rel["recusados_lista"]
         posse_lances[l["id"]] = [list(s) for s in runs]
         posse_originais[l["id"]] = [list(s) for s in originais]
+        bola_original[l["id"]] = bola_orig
+        distancia_original[l["id"]] = dist_orig
         print(f"{l['titulo']}: {l['frames']} frames, {len(l['jogadores'])} jogadores; "
               f"posse original {len(originais)} segmentos; bola ao pe: {rel['quadros_movidos']} quadros, "
               f"deslocamento max {rel['deslocamento_max']} m, vel max {rel['vel_max']} m/s, "
@@ -271,7 +281,10 @@ def main(origem, destino):
         json.dump({"lances": saida}, f, separators=(",", ":"), ensure_ascii=False)
     POSSE_SAIDA.parent.mkdir(parents=True, exist_ok=True)
     with open(POSSE_SAIDA, "w", encoding="utf-8") as f:
-        json.dump({"fps": FPS, "lances": posse_lances, "originais": posse_originais}, f, ensure_ascii=False, indent=1)
+        json.dump({"fps": FPS, "lances": posse_lances, "originais": posse_originais,
+                   "bola_original": bola_original, "distancia_original": distancia_original,
+                   "recusados": recusados},
+                  f, ensure_ascii=False, indent=1)
         f.write("\n")
 
 
