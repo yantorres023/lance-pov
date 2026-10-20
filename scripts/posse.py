@@ -153,7 +153,7 @@ def _colar_uma_vez(fps, bola, jogadores, segmentos, vmax=VMAX_MS, lim=None, vmax
         if pid not in jogadores:
             raise ValueError(f"segmento de jogador desconhecido: {pid}")
         for f in range(max(0, a), min(n - 1, b) + 1):
-            if velb_m[f] > corte:
+            if velb_m[f] > corte and tipo != "chute":  # chute: o jogador esta na bola no instante do chute
                 cortados += 1
                 continue
             if dono[f] is None:

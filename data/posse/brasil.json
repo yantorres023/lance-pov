@@ -1,0 +1,124 @@
+{
+ "fps": 20,
+ "lances": {
+  "neymar-santos-flamengo-2011": [
+   [
+    "neymar",
+    0,
+    2
+   ],
+   [
+    "borges",
+    12,
+    16
+   ],
+   [
+    "neymar",
+    26,
+    52
+   ],
+   [
+    "neymar",
+    94,
+    125
+   ]
+  ],
+  "arrascaeta-corinthians-cruzeiro-2018": [
+   [
+    "raniel",
+    50,
+    51
+   ],
+   [
+    "arrascaeta",
+    73,
+    105
+   ]
+  ],
+  "everton-ribeiro-cruzeiro-flamengo-2013": [
+   [
+    "everton",
+    22,
+    26
+   ],
+   [
+    "parceiro",
+    30,
+    34
+   ],
+   [
+    "everton",
+    38,
+    61
+   ]
+  ],
+  "fred-fluminense-flamengo-2012": [
+   [
+    "deco",
+    14,
+    16
+   ]
+  ],
+  "arrascaeta-ceara-flamengo-2019": [],
+  "roberto-dinamite-vasco-botafogo-1976": [
+   [
+    "zanata",
+    8,
+    10
+   ]
+  ],
+  "alex-sao-paulo-palmeiras-2002": [
+   [
+    "christian",
+    6,
+    7
+   ],
+   [
+    "alex",
+    41,
+    64
+   ]
+  ],
+  "rogerio-ceni-sao-paulo-corinthians-2011": [
+   [
+    "ceni",
+    48,
+    49
+   ]
+  ],
+  "ronaldinho-atletico-mg-cruzeiro-2012": [
+   [
+    "passador",
+    2,
+    6
+   ],
+   [
+    "ronaldinho",
+    18,
+    216
+   ]
+  ],
+  "wendell-lira-goianesia-atletico-go-2015": [],
+  "guilherme-madruga-botafogo-sp-novorizontino-2023": [
+   [
+    "madruga",
+    48,
+    51
+   ]
+  ],
+  "alerrandro-vitoria-cruzeiro-2024": [
+   [
+    "passador",
+    2,
+    4
+   ]
+  ],
+  "pedro-flamengo-vitoria-2025": [
+   [
+    "pedro",
+    19,
+    52
+   ]
+  ]
+ }
+}

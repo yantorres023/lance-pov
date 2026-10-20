@@ -102,6 +102,7 @@ def checar_eventos(lances, posse_meta):
     """(E): ver o cabecalho. Devolve (falhas, conflitos, total de eventos/quadros checados)."""
     falhas, conflitos = [], []
     checados = ok = 0
+    ev_tot = ev_ok = car_tot = car_ok = 0
     for l in sorted(lances, key=lambda z: z["ordem"]):
         t0 = posse_meta["t0"].get(l["id"])
         if t0 is None or "auditoria" not in l:
@@ -136,12 +137,14 @@ def checar_eventos(lances, posse_meta):
                 continue
             pid = str(e["player"]["id"])
             checados += 1
+            ev_tot += 1
             if pid not in jog:
                 falhas.append(f"{l['ordem']:>2} {l['titulo']}: {e['type']['name']} sem trajetoria do autor {pid}")
                 continue
             d = math.dist(em(jog[pid], f), em(bola, f))
             if d <= E_LIMITE_EVENTO_M:
                 ok += 1
+                ev_ok += 1
                 continue
             ev_xy = _campo(e["location"], e["team"]["id"] != gol_team) if gol_team is not None else None
             motivo = classificar(pid, f, te - t0, ev_xy, d)
@@ -162,9 +165,11 @@ def checar_eventos(lances, posse_meta):
                 continue
             for fr in range(max(0, math.ceil((te - t0) * FPS - 1e-9)), min(n - 1, math.floor((te + dur - t0) * FPS + 1e-9)) + 1):
                 checados += 1
+                car_tot += 1
                 d = math.dist(jog[pid][fr], bola[fr][:2])
                 if d <= E_LIMITE_CARRY_M:
                     ok += 1
+                    car_ok += 1
                     continue
                 motivo = classificar(pid, fr, fr / FPS, None, d)
                 item = f"{l['ordem']:>2} Carry {pid} quadro {fr} (t={fr / FPS:.2f}s) autor={d:.2f} m"
@@ -173,7 +178,7 @@ def checar_eventos(lances, posse_meta):
                 else:
                     falhas.append(f"{l['ordem']:>2} {l['titulo']}: conducao {pid} no quadro {fr}, autor a {d:.2f} m da bola (max {E_LIMITE_CARRY_M})")
                     break
-    return falhas, conflitos, checados, ok
+    return falhas, conflitos, checados, ok, (ev_tot, ev_ok, car_tot, car_ok)
 
 
 def carregar_posse():
@@ -265,11 +270,21 @@ def main():
         if vmax_j > 11.5 + 1e-6:
             falha(l, f"jogador a {vmax_j:.2f} m/s (max 11,5 mesmo em trecho registrado)")
         vmax_b = 0.0
+        # (c) bola: 45 m/s. Acima disso so em janela de conflito da cadeia registrado (dois eventos com bola
+        # no mesmo instante e lugares distantes: o dado nao cabe, ver cadeia_bola em prepare_statsbomb.py).
+        janelas_bola = [(r_["t_ini"], r_["t_fim"]) for r_ in
+                        posse_meta_full.get("ancoras", {}).get(l["id"], {}).get("bola", [])]
         for i in range(1, n):
             if bola[i] is None or bola[i - 1] is None:
                 continue
-            vmax_b = max(vmax_b, math.dist(bola[i], bola[i - 1]) * FPS)
-        if vmax_b > 45.0:
+            v_b = math.dist(bola[i], bola[i - 1]) * FPS
+            vmax_b = max(vmax_b, v_b)
+            if v_b > 45.0:
+                tr = i / FPS
+                if not any(a_ <= tr <= b_ for a_, b_ in janelas_bola):
+                    falha(l, f"bola a {v_b:.2f} m/s no quadro {i} (max 45; excecao so em conflito registrado)")
+                    break
+        if vmax_b > 45.0 and not janelas_bola:
             falha(l, f"bola a {vmax_b:.2f} m/s (max 45)")
         # (g)
         for j in jogs:
@@ -312,7 +327,12 @@ def main():
                 dist_a = None
             else:
                 dist_a = math.dist((b[0], b[1]), tuple(p))
-                if dist_a >= 1.5:
+                # (a): excecao registrada: o finalizador tem conflito de velocidade entre eventos que termina
+                # ate 0,15 s antes do chute (ver data/posse/statsbomb.json, ancoras.conflito)
+                t_chute_rel = c / FPS
+                conflito_chute = any(r_["pid"] == fin_id and r_["t_fim"] >= t_chute_rel - 0.15
+                                     for r_ in posse_meta_full.get("ancoras", {}).get(l["id"], {}).get("conflito", []))
+                if dist_a >= 1.5 and not conflito_chute:
                     falha(l, f"finalizador a {dist_a:.2f} m da bola no chute (max 1,5)")
             inicio = c
         else:
@@ -416,11 +436,13 @@ def main():
     print("\n".join(resumo))
     print(f"    (A) colagem: {a_bons} de {a_total} quadros de posse a ate {A_LIMITE_M} m do dono "
           f"({100 * a_bons / max(1, a_total):.2f}%)")
-    ef, ec, e_tot, e_ok = checar_eventos(lances, posse_meta_full)
+    ef, ec, e_tot, e_ok, (ev_tot, ev_ok, car_tot, car_ok) = checar_eventos(lances, posse_meta_full)
     falhas.extend(ef)
     print(f"    (A) quadros de posse fora do calculo por conflito do dado: {len(conflitos_gerais)}")
     print(f"    (E) eventos com bola e conducoes: {e_ok} de {e_tot} quadros/eventos ate o limite; "
           f"conflitos do dado listados: {len(ec)}; falhas: {len(ef)}")
+    print(f"    (E) eventos com bola: {ev_ok} de {ev_tot} ({100 * ev_ok / max(1, ev_tot):.2f}%); "
+          f"quadros de conducao: {car_ok} de {car_tot} ({100 * car_ok / max(1, car_tot):.2f}%)")
     for linha in conflitos_gerais + ec:
         print("      conflito:", linha)
     if falhas:
