@@ -1,0 +1,8620 @@
+{
+ "lances": [
+  {
+   "id": "neymar-santos-flamengo-2011",
+   "titulo": "Neymar — o gol do Puskás",
+   "subtitulo": "Santos 4 × 5 Flamengo · Brasileirão 2011 · 27/07/2011",
+   "grupo": "brasil",
+   "ordem": 1,
+   "contexto": "Vila Belmiro, 25'. O placar vai de 2 × 0 para 3 × 0. Prêmio Puskás 2011.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 8.0,
+   "times": {
+    "attack": "Santos",
+    "defense": "Flamengo"
+   },
+   "finalizadorId": "neymar",
+   "chavesBola": [
+    [
+     0.0,
+     21.5,
+     20.5,
+     0.11
+    ],
+    [
+     0.7,
+     25.0,
+     16.0,
+     0.11
+    ],
+    [
+     1.4,
+     27.0,
+     19.0,
+     0.11
+    ],
+    [
+     2.2,
+     31.5,
+     17.0,
+     0.11
+    ],
+    [
+     3.2,
+     36.4,
+     11.4,
+     0.11
+    ],
+    [
+     4.2,
+     40.6,
+     8.0,
+     0.11
+    ],
+    [
+     5.6,
+     45.0,
+     4.2,
+     0.11
+    ],
+    [
+     6.1,
+     52.6,
+     -1.6,
+     0.11
+    ],
+    [
+     6.9,
+     53.5,
+     -1.8,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "neymar",
+     "time": "attack",
+     "numero": 11,
+     "nome": "Neymar",
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       21.0,
+       21.0
+      ],
+      [
+       1.4,
+       27.0,
+       19.0
+      ],
+      [
+       2.2,
+       31.5,
+       17.0
+      ],
+      [
+       3.2,
+       36.8,
+       11.0
+      ],
+      [
+       4.2,
+       41.0,
+       7.5
+      ],
+      [
+       5.6,
+       45.0,
+       4.2
+      ],
+      [
+       8.0,
+       49.5,
+       2.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "borges",
+     "time": "attack",
+     "numero": null,
+     "nome": "Borges",
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       14.5
+      ],
+      [
+       0.7,
+       25.0,
+       16.0
+      ],
+      [
+       1.6,
+       25.5,
+       17.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       4.0,
+       -49.0,
+       0.0
+      ],
+      [
+       8.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       -20.0
+      ],
+      [
+       4.0,
+       -7.0,
+       -20.0
+      ],
+      [
+       8.0,
+       -6.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       -7.0
+      ],
+      [
+       4.0,
+       -7.0,
+       -7.0
+      ],
+      [
+       8.0,
+       -6.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       7.0
+      ],
+      [
+       4.0,
+       -7.0,
+       7.0
+      ],
+      [
+       8.0,
+       -6.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       20.0
+      ],
+      [
+       4.0,
+       -7.0,
+       20.0
+      ],
+      [
+       8.0,
+       -6.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       -22.0
+      ],
+      [
+       4.0,
+       9.0,
+       -22.0
+      ],
+      [
+       8.0,
+       10.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       -7.5
+      ],
+      [
+       4.0,
+       9.0,
+       -7.5
+      ],
+      [
+       8.0,
+       10.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       7.5
+      ],
+      [
+       4.0,
+       9.0,
+       7.5
+      ],
+      [
+       8.0,
+       10.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       20.0,
+       -5.0
+      ],
+      [
+       4.0,
+       21.0,
+       -5.0
+      ],
+      [
+       8.0,
+       22.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "angelim",
+     "time": "defense",
+     "numero": null,
+     "nome": "Ronaldo Angelim",
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       37.0,
+       10.0
+      ],
+      [
+       2.6,
+       37.6,
+       12.0
+      ],
+      [
+       3.6,
+       38.0,
+       12.4
+      ],
+      [
+       5.0,
+       40.0,
+       9.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "marcador-a",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       28.5,
+       20.5
+      ],
+      [
+       1.4,
+       29.8,
+       18.8
+      ],
+      [
+       2.6,
+       31.0,
+       18.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "marcador-b",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       33.5,
+       16.0
+      ],
+      [
+       2.2,
+       33.0,
+       16.0
+      ],
+      [
+       4.0,
+       34.5,
+       14.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "felipe",
+     "time": "defense",
+     "numero": null,
+     "nome": "Felipe",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.5,
+       0.0
+      ],
+      [
+       4.0,
+       49.5,
+       2.5
+      ],
+      [
+       5.6,
+       48.5,
+       5.0
+      ],
+      [
+       6.8,
+       49.0,
+       4.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       -20.0
+      ],
+      [
+       4.0,
+       37.0,
+       -20.0
+      ],
+      [
+       8.0,
+       38.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       -7.0
+      ],
+      [
+       4.0,
+       37.0,
+       -7.0
+      ],
+      [
+       8.0,
+       38.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       -22.0
+      ],
+      [
+       4.0,
+       25.0,
+       -22.0
+      ],
+      [
+       8.0,
+       26.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       -7.5
+      ],
+      [
+       4.0,
+       25.0,
+       -7.5
+      ],
+      [
+       8.0,
+       26.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       7.5
+      ],
+      [
+       4.0,
+       25.0,
+       7.5
+      ],
+      [
+       8.0,
+       26.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       10.0,
+       -5.0
+      ],
+      [
+       4.0,
+       11.0,
+       -5.0
+      ],
+      [
+       8.0,
+       12.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       10.0,
+       5.0
+      ],
+      [
+       4.0,
+       11.0,
+       5.0
+      ],
+      [
+       8.0,
+       12.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "arrascaeta-corinthians-cruzeiro-2018",
+   "titulo": "Arrascaeta — o gol da final da Copa do Brasil",
+   "subtitulo": "Corinthians 1 × 2 Cruzeiro · Copa do Brasil 2018 (volta) · 17/10/2018",
+   "grupo": "brasil",
+   "ordem": 2,
+   "contexto": "Arena Corinthians, 82'. O placar vai de 1 × 1 para 1 × 2. Cruzeiro campeão.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 7.5,
+   "times": {
+    "attack": "Cruzeiro",
+    "defense": "Corinthians"
+   },
+   "finalizadorId": "arrascaeta",
+   "chavesBola": [
+    [
+     0.0,
+     3.6,
+     6.0,
+     0.11
+    ],
+    [
+     2.6,
+     12.0,
+     4.5,
+     0.11
+    ],
+    [
+     3.6,
+     33.0,
+     2.8,
+     0.11
+    ],
+    [
+     5.2,
+     44.5,
+     1.6,
+     0.11
+    ],
+    [
+     5.6,
+     47.5,
+     0.8,
+     2.5
+    ],
+    [
+     6.1,
+     52.6,
+     -0.2,
+     1.7
+    ],
+    [
+     6.5,
+     53.5,
+     -0.3,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "raniel",
+     "time": "attack",
+     "numero": null,
+     "nome": "Raniel",
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       3.0,
+       6.0
+      ],
+      [
+       2.6,
+       12.0,
+       4.5
+      ],
+      [
+       4.5,
+       17.0,
+       4.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "arrascaeta",
+     "time": "attack",
+     "numero": null,
+     "nome": "Arrascaeta",
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       18.0,
+       4.0
+      ],
+      [
+       2.6,
+       27.0,
+       2.5
+      ],
+      [
+       3.6,
+       33.0,
+       2.8
+      ],
+      [
+       4.4,
+       38.8,
+       2.2
+      ],
+      [
+       5.2,
+       44.5,
+       1.6
+      ],
+      [
+       6.5,
+       45.2,
+       0.6
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.75,
+       -49.0,
+       0.0
+      ],
+      [
+       7.5,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -12.0,
+       -20.0
+      ],
+      [
+       3.75,
+       -11.0,
+       -20.0
+      ],
+      [
+       7.5,
+       -10.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -12.0,
+       -7.0
+      ],
+      [
+       3.75,
+       -11.0,
+       -7.0
+      ],
+      [
+       7.5,
+       -10.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -12.0,
+       7.0
+      ],
+      [
+       3.75,
+       -11.0,
+       7.0
+      ],
+      [
+       7.5,
+       -10.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -12.0,
+       20.0
+      ],
+      [
+       3.75,
+       -11.0,
+       20.0
+      ],
+      [
+       7.5,
+       -10.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       6.0,
+       -22.0
+      ],
+      [
+       3.75,
+       7.0,
+       -22.0
+      ],
+      [
+       7.5,
+       8.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       6.0,
+       -7.5
+      ],
+      [
+       3.75,
+       7.0,
+       -7.5
+      ],
+      [
+       7.5,
+       8.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       6.0,
+       22.0
+      ],
+      [
+       3.75,
+       7.0,
+       22.0
+      ],
+      [
+       7.5,
+       8.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       -5.0
+      ],
+      [
+       3.75,
+       25.0,
+       -5.0
+      ],
+      [
+       7.5,
+       26.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "cassio",
+     "time": "defense",
+     "numero": null,
+     "nome": "Cássio",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       49.5,
+       0.0
+      ],
+      [
+       4.5,
+       48.5,
+       0.2
+      ],
+      [
+       5.2,
+       47.2,
+       0.2
+      ],
+      [
+       6.0,
+       48.8,
+       1.6
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       -20.0
+      ],
+      [
+       3.75,
+       37.0,
+       -20.0
+      ],
+      [
+       7.5,
+       38.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       -7.0
+      ],
+      [
+       3.75,
+       37.0,
+       -7.0
+      ],
+      [
+       7.5,
+       38.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       7.0
+      ],
+      [
+       3.75,
+       37.0,
+       7.0
+      ],
+      [
+       7.5,
+       38.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       20.0
+      ],
+      [
+       3.75,
+       37.0,
+       20.0
+      ],
+      [
+       7.5,
+       38.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       -22.0
+      ],
+      [
+       3.75,
+       27.0,
+       -22.0
+      ],
+      [
+       7.5,
+       28.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       -7.5
+      ],
+      [
+       3.75,
+       27.0,
+       -7.5
+      ],
+      [
+       7.5,
+       28.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       7.5
+      ],
+      [
+       3.75,
+       27.0,
+       7.5
+      ],
+      [
+       7.5,
+       28.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f8",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       22.0
+      ],
+      [
+       3.75,
+       27.0,
+       22.0
+      ],
+      [
+       7.5,
+       28.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f9",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -5.0
+      ],
+      [
+       3.75,
+       15.0,
+       -5.0
+      ],
+      [
+       7.5,
+       16.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f10",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       5.0
+      ],
+      [
+       3.75,
+       15.0,
+       5.0
+      ],
+      [
+       7.5,
+       16.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "everton-ribeiro-cruzeiro-flamengo-2013",
+   "titulo": "Éverton Ribeiro — chapéu e voleio",
+   "subtitulo": "Cruzeiro 2 × 1 Flamengo · Copa do Brasil 2013 (oitavas, ida) · 21/08/2013",
+   "grupo": "brasil",
+   "ordem": 3,
+   "contexto": "Mineirão, segundo tempo. Oitavas de final, jogo de ida. Chapéu num defensor e voleio no ângulo.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.5,
+   "times": {
+    "attack": "Cruzeiro",
+    "defense": "Flamengo"
+   },
+   "finalizadorId": "everton",
+   "chavesBola": [
+    [
+     0.0,
+     29.5,
+     -21.5,
+     0.11
+    ],
+    [
+     1.2,
+     33.0,
+     -20.5,
+     0.11
+    ],
+    [
+     1.6,
+     34.0,
+     -18.0,
+     0.11
+    ],
+    [
+     2.0,
+     35.0,
+     -16.5,
+     0.11
+    ],
+    [
+     3.0,
+     37.6,
+     -12.6,
+     0.11
+    ],
+    [
+     3.45,
+     39.2,
+     -10.8,
+     1.5
+    ],
+    [
+     4.0,
+     41.6,
+     -8.2,
+     0.95
+    ],
+    [
+     4.5,
+     52.6,
+     -2.8,
+     2.1
+    ],
+    [
+     5.2,
+     53.6,
+     -2.9,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "everton",
+     "time": "attack",
+     "numero": null,
+     "nome": "Éverton Ribeiro",
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       -21.0
+      ],
+      [
+       1.2,
+       33.0,
+       -20.5
+      ],
+      [
+       2.0,
+       35.0,
+       -16.5
+      ],
+      [
+       3.0,
+       37.4,
+       -12.6
+      ],
+      [
+       4.0,
+       41.5,
+       -8.3
+      ],
+      [
+       5.0,
+       44.5,
+       -5.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "parceiro",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       31.0,
+       -15.0
+      ],
+      [
+       1.6,
+       34.0,
+       -18.0
+      ],
+      [
+       2.4,
+       36.0,
+       -19.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.25,
+       -49.0,
+       0.0
+      ],
+      [
+       6.5,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       -20.0
+      ],
+      [
+       3.25,
+       -7.0,
+       -20.0
+      ],
+      [
+       6.5,
+       -6.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       -7.0
+      ],
+      [
+       3.25,
+       -7.0,
+       -7.0
+      ],
+      [
+       6.5,
+       -6.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       7.0
+      ],
+      [
+       3.25,
+       -7.0,
+       7.0
+      ],
+      [
+       6.5,
+       -6.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       20.0
+      ],
+      [
+       3.25,
+       -7.0,
+       20.0
+      ],
+      [
+       6.5,
+       -6.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -7.5
+      ],
+      [
+       3.25,
+       13.0,
+       -7.5
+      ],
+      [
+       6.5,
+       14.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       7.5
+      ],
+      [
+       3.25,
+       13.0,
+       7.5
+      ],
+      [
+       6.5,
+       14.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       22.0
+      ],
+      [
+       3.25,
+       13.0,
+       22.0
+      ],
+      [
+       6.5,
+       14.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       5.0
+      ],
+      [
+       3.25,
+       27.0,
+       5.0
+      ],
+      [
+       6.5,
+       28.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "zagueiro",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       38.8,
+       -11.0
+      ],
+      [
+       2.8,
+       39.4,
+       -11.4
+      ],
+      [
+       3.6,
+       40.8,
+       -10.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "goleiro",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       49.5,
+       0.0
+      ],
+      [
+       3.5,
+       49.0,
+       -0.8
+      ],
+      [
+       4.0,
+       49.8,
+       -1.0
+      ],
+      [
+       4.6,
+       50.6,
+       -2.2
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       -20.0
+      ],
+      [
+       3.25,
+       39.0,
+       -20.0
+      ],
+      [
+       6.5,
+       40.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       7.0
+      ],
+      [
+       3.25,
+       39.0,
+       7.0
+      ],
+      [
+       6.5,
+       40.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       20.0
+      ],
+      [
+       3.25,
+       39.0,
+       20.0
+      ],
+      [
+       6.5,
+       40.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       -22.0
+      ],
+      [
+       3.25,
+       27.0,
+       -22.0
+      ],
+      [
+       6.5,
+       28.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       -7.5
+      ],
+      [
+       3.25,
+       27.0,
+       -7.5
+      ],
+      [
+       6.5,
+       28.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       7.5
+      ],
+      [
+       3.25,
+       27.0,
+       7.5
+      ],
+      [
+       6.5,
+       28.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       22.0
+      ],
+      [
+       3.25,
+       27.0,
+       22.0
+      ],
+      [
+       6.5,
+       28.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f8",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -5.0
+      ],
+      [
+       3.25,
+       15.0,
+       -5.0
+      ],
+      [
+       6.5,
+       16.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f9",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       5.0
+      ],
+      [
+       3.25,
+       15.0,
+       5.0
+      ],
+      [
+       6.5,
+       16.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "fred-fluminense-flamengo-2012",
+   "titulo": "Fred — o voleio do Engenhão",
+   "subtitulo": "Fluminense 1 × 0 Flamengo · Brasileirão 2012 · 30/09/2012",
+   "grupo": "brasil",
+   "ordem": 4,
+   "contexto": "Engenhão, 18'. Voleio após cruzamento de Deco. Eleito o mais bonito na enquete do GE de 2020.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "Fluminense",
+    "defense": "Flamengo"
+   },
+   "finalizadorId": "fred",
+   "chavesBola": [
+    [
+     0.0,
+     25.0,
+     -22.5,
+     0.11
+    ],
+    [
+     0.8,
+     28.0,
+     -24.0,
+     0.11
+    ],
+    [
+     1.8,
+     38.0,
+     -14.0,
+     4.0
+    ],
+    [
+     2.6,
+     43.8,
+     -5.2,
+     1.3
+    ],
+    [
+     2.95,
+     52.6,
+     -1.0,
+     1.2
+    ],
+    [
+     3.8,
+     53.5,
+     -1.1,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "deco",
+     "time": "attack",
+     "numero": null,
+     "nome": "Deco",
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       25.5,
+       -22.0
+      ],
+      [
+       0.8,
+       28.0,
+       -24.0
+      ],
+      [
+       1.6,
+       31.0,
+       -22.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "fred",
+     "time": "attack",
+     "numero": 9,
+     "nome": "Fred",
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       40.5,
+       -1.0
+      ],
+      [
+       1.4,
+       42.0,
+       -3.5
+      ],
+      [
+       2.2,
+       43.4,
+       -4.8
+      ],
+      [
+       2.6,
+       43.6,
+       -5.0
+      ],
+      [
+       3.6,
+       45.0,
+       -3.2
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.0,
+       0.0
+      ],
+      [
+       6.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -3.0,
+       -20.0
+      ],
+      [
+       6.0,
+       -2.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -3.0,
+       -7.0
+      ],
+      [
+       6.0,
+       -2.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       7.0
+      ],
+      [
+       3.0,
+       -3.0,
+       7.0
+      ],
+      [
+       6.0,
+       -2.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       20.0
+      ],
+      [
+       3.0,
+       -3.0,
+       20.0
+      ],
+      [
+       6.0,
+       -2.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       -7.5
+      ],
+      [
+       3.0,
+       17.0,
+       -7.5
+      ],
+      [
+       6.0,
+       18.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       7.5
+      ],
+      [
+       3.0,
+       17.0,
+       7.5
+      ],
+      [
+       6.0,
+       18.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       22.0
+      ],
+      [
+       3.0,
+       17.0,
+       22.0
+      ],
+      [
+       6.0,
+       18.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#0a6b3c",
+     "chaves": [
+      [
+       0.0,
+       32.0,
+       5.0
+      ],
+      [
+       3.0,
+       33.0,
+       5.0
+      ],
+      [
+       6.0,
+       34.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "goleiro",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.0,
+       0.5
+      ],
+      [
+       1.8,
+       50.0,
+       0.6
+      ],
+      [
+       2.6,
+       49.8,
+       1.0
+      ],
+      [
+       3.4,
+       50.8,
+       -0.6
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       -20.0
+      ],
+      [
+       3.0,
+       35.0,
+       -20.0
+      ],
+      [
+       6.0,
+       36.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       -7.0
+      ],
+      [
+       3.0,
+       35.0,
+       -7.0
+      ],
+      [
+       6.0,
+       36.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       7.0
+      ],
+      [
+       3.0,
+       35.0,
+       7.0
+      ],
+      [
+       6.0,
+       36.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       20.0
+      ],
+      [
+       3.0,
+       35.0,
+       20.0
+      ],
+      [
+       6.0,
+       36.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       -22.0
+      ],
+      [
+       3.0,
+       25.0,
+       -22.0
+      ],
+      [
+       6.0,
+       26.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       -7.5
+      ],
+      [
+       3.0,
+       25.0,
+       -7.5
+      ],
+      [
+       6.0,
+       26.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       7.5
+      ],
+      [
+       3.0,
+       25.0,
+       7.5
+      ],
+      [
+       6.0,
+       26.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f8",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       22.0
+      ],
+      [
+       3.0,
+       25.0,
+       22.0
+      ],
+      [
+       6.0,
+       26.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f9",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -5.0
+      ],
+      [
+       3.0,
+       13.0,
+       -5.0
+      ],
+      [
+       6.0,
+       14.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f10",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       5.0
+      ],
+      [
+       3.0,
+       13.0,
+       5.0
+      ],
+      [
+       6.0,
+       14.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "arrascaeta-ceara-flamengo-2019",
+   "titulo": "Arrascaeta — a bicicleta do Castelão",
+   "subtitulo": "Ceará 0 × 3 Flamengo · Brasileirão 2019 · 25/08/2019",
+   "grupo": "brasil",
+   "ordem": 5,
+   "contexto": "Castelão, 51' do 2º tempo. Bicicleta após cruzamento de Rafinha. 2º na enquete do GE.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "Flamengo",
+    "defense": "Ceará"
+   },
+   "finalizadorId": "arrascaeta",
+   "chavesBola": [
+    [
+     0.0,
+     30.0,
+     22.0,
+     0.11
+    ],
+    [
+     0.9,
+     36.0,
+     14.0,
+     4.0
+    ],
+    [
+     1.7,
+     40.2,
+     2.0,
+     2.2
+    ],
+    [
+     2.1,
+     47.0,
+     0.8,
+     1.9
+    ],
+    [
+     2.4,
+     52.6,
+     0.4,
+     1.6
+    ],
+    [
+     3.2,
+     53.5,
+     0.3,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "rafinha",
+     "time": "attack",
+     "numero": null,
+     "nome": "Rafinha",
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       22.0
+      ],
+      [
+       0.6,
+       31.0,
+       22.5
+      ],
+      [
+       2.0,
+       33.5,
+       23.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "arrascaeta",
+     "time": "attack",
+     "numero": null,
+     "nome": "Arrascaeta",
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       6.0
+      ],
+      [
+       1.0,
+       37.5,
+       4.0
+      ],
+      [
+       1.7,
+       40.2,
+       2.0
+      ],
+      [
+       2.5,
+       42.5,
+       1.0
+      ],
+      [
+       3.4,
+       44.0,
+       0.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.0,
+       0.0
+      ],
+      [
+       6.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -5.0,
+       -20.0
+      ],
+      [
+       6.0,
+       -4.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -5.0,
+       -7.0
+      ],
+      [
+       6.0,
+       -4.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       7.0
+      ],
+      [
+       3.0,
+       -5.0,
+       7.0
+      ],
+      [
+       6.0,
+       -4.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       20.0
+      ],
+      [
+       3.0,
+       -5.0,
+       20.0
+      ],
+      [
+       6.0,
+       -4.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -22.0
+      ],
+      [
+       3.0,
+       13.0,
+       -22.0
+      ],
+      [
+       6.0,
+       14.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -7.5
+      ],
+      [
+       3.0,
+       13.0,
+       -7.5
+      ],
+      [
+       6.0,
+       14.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       7.5
+      ],
+      [
+       3.0,
+       13.0,
+       7.5
+      ],
+      [
+       6.0,
+       14.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       22.0
+      ],
+      [
+       3.0,
+       13.0,
+       22.0
+      ],
+      [
+       6.0,
+       14.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "goleiro",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.5,
+       0.0
+      ],
+      [
+       1.2,
+       50.0,
+       0.0
+      ],
+      [
+       1.7,
+       50.0,
+       0.3
+      ],
+      [
+       2.5,
+       51.0,
+       -1.5
+      ],
+      [
+       3.4,
+       51.3,
+       -1.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       -20.0
+      ],
+      [
+       3.0,
+       37.0,
+       -20.0
+      ],
+      [
+       6.0,
+       38.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       -7.0
+      ],
+      [
+       3.0,
+       37.0,
+       -7.0
+      ],
+      [
+       6.0,
+       38.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       7.0
+      ],
+      [
+       3.0,
+       37.0,
+       7.0
+      ],
+      [
+       6.0,
+       38.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       20.0
+      ],
+      [
+       3.0,
+       37.0,
+       20.0
+      ],
+      [
+       6.0,
+       38.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       -22.0
+      ],
+      [
+       3.0,
+       27.0,
+       -22.0
+      ],
+      [
+       6.0,
+       28.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       -7.5
+      ],
+      [
+       3.0,
+       27.0,
+       -7.5
+      ],
+      [
+       6.0,
+       28.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       7.5
+      ],
+      [
+       3.0,
+       27.0,
+       7.5
+      ],
+      [
+       6.0,
+       28.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f8",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       22.0
+      ],
+      [
+       3.0,
+       27.0,
+       22.0
+      ],
+      [
+       6.0,
+       28.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f9",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -5.0
+      ],
+      [
+       3.0,
+       15.0,
+       -5.0
+      ],
+      [
+       6.0,
+       16.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f10",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       5.0
+      ],
+      [
+       3.0,
+       15.0,
+       5.0
+      ],
+      [
+       6.0,
+       16.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "roberto-dinamite-vasco-botafogo-1976",
+   "titulo": "Roberto Dinamite — o gol do lençol",
+   "subtitulo": "Vasco 2 × 1 Botafogo · Carioca 1976 · 09/05/1976",
+   "grupo": "brasil",
+   "ordem": 6,
+   "contexto": "Maracanã, 1976. Lençol no zagueiro Osmar e finalização de primeira, antes de a bola tocar o chão.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "Vasco",
+    "defense": "Botafogo"
+   },
+   "finalizadorId": "dinamite",
+   "chavesBola": [
+    [
+     0.0,
+     27.5,
+     -24.0,
+     0.11
+    ],
+    [
+     0.5,
+     28.2,
+     -25.0,
+     0.11
+    ],
+    [
+     1.4,
+     36.0,
+     -16.0,
+     3.2
+    ],
+    [
+     2.3,
+     41.0,
+     -7.5,
+     1.4
+    ],
+    [
+     2.8,
+     42.4,
+     -5.9,
+     1.9
+    ],
+    [
+     3.0,
+     43.6,
+     -5.0,
+     2.0
+    ],
+    [
+     3.4,
+     45.4,
+     -3.6,
+     1.0
+    ],
+    [
+     3.8,
+     52.6,
+     -1.2,
+     0.5
+    ],
+    [
+     4.6,
+     53.5,
+     -1.3,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "zanata",
+     "time": "attack",
+     "numero": null,
+     "nome": "Zanata",
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       27.5,
+       -24.0
+      ],
+      [
+       0.5,
+       28.2,
+       -25.0
+      ],
+      [
+       1.8,
+       31.0,
+       -22.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "dinamite",
+     "time": "attack",
+     "numero": null,
+     "nome": "Roberto Dinamite",
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       37.0,
+       -10.0
+      ],
+      [
+       1.8,
+       39.5,
+       -8.0
+      ],
+      [
+       2.3,
+       41.0,
+       -7.0
+      ],
+      [
+       2.8,
+       42.2,
+       -6.0
+      ],
+      [
+       3.4,
+       45.2,
+       -3.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.0,
+       0.0
+      ],
+      [
+       6.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -5.0,
+       -20.0
+      ],
+      [
+       6.0,
+       -4.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -5.0,
+       -7.0
+      ],
+      [
+       6.0,
+       -4.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       7.0
+      ],
+      [
+       3.0,
+       -5.0,
+       7.0
+      ],
+      [
+       6.0,
+       -4.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       20.0
+      ],
+      [
+       3.0,
+       -5.0,
+       20.0
+      ],
+      [
+       6.0,
+       -4.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -7.5
+      ],
+      [
+       3.0,
+       13.0,
+       -7.5
+      ],
+      [
+       6.0,
+       14.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       7.5
+      ],
+      [
+       3.0,
+       13.0,
+       7.5
+      ],
+      [
+       6.0,
+       14.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       22.0
+      ],
+      [
+       3.0,
+       13.0,
+       22.0
+      ],
+      [
+       6.0,
+       14.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       5.0
+      ],
+      [
+       3.0,
+       29.0,
+       5.0
+      ],
+      [
+       6.0,
+       30.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "osmar",
+     "time": "defense",
+     "numero": null,
+     "nome": "Osmar",
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       42.0,
+       -6.0
+      ],
+      [
+       2.0,
+       43.2,
+       -6.8
+      ],
+      [
+       3.4,
+       43.6,
+       -6.6
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "wendell",
+     "time": "defense",
+     "numero": null,
+     "nome": "Wendell",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.5,
+       0.0
+      ],
+      [
+       2.6,
+       50.5,
+       0.0
+      ],
+      [
+       3.4,
+       51.0,
+       1.4
+      ],
+      [
+       4.0,
+       51.2,
+       1.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       -20.0
+      ],
+      [
+       3.0,
+       39.0,
+       -20.0
+      ],
+      [
+       6.0,
+       40.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       7.0
+      ],
+      [
+       3.0,
+       39.0,
+       7.0
+      ],
+      [
+       6.0,
+       40.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       20.0
+      ],
+      [
+       3.0,
+       39.0,
+       20.0
+      ],
+      [
+       6.0,
+       40.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       -22.0
+      ],
+      [
+       3.0,
+       29.0,
+       -22.0
+      ],
+      [
+       6.0,
+       30.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       -7.5
+      ],
+      [
+       3.0,
+       29.0,
+       -7.5
+      ],
+      [
+       6.0,
+       30.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       7.5
+      ],
+      [
+       3.0,
+       29.0,
+       7.5
+      ],
+      [
+       6.0,
+       30.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       22.0
+      ],
+      [
+       3.0,
+       29.0,
+       22.0
+      ],
+      [
+       6.0,
+       30.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f8",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       -5.0
+      ],
+      [
+       3.0,
+       17.0,
+       -5.0
+      ],
+      [
+       6.0,
+       18.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f9",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1a1a1a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       5.0
+      ],
+      [
+       3.0,
+       17.0,
+       5.0
+      ],
+      [
+       6.0,
+       18.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "alex-sao-paulo-palmeiras-2002",
+   "titulo": "Alex — o gol por cima de Rogério Ceni",
+   "subtitulo": "São Paulo 2 × 4 Palmeiras · Torneio Rio-São Paulo 2002 · 20/03/2002",
+   "grupo": "brasil",
+   "ordem": 7,
+   "contexto": "Morumbi. Lançamento de Christian, toque sutil em Émerson e encobrida no goleiro Rogério Ceni, na saída.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "Palmeiras",
+    "defense": "São Paulo"
+   },
+   "finalizadorId": "alex",
+   "chavesBola": [
+    [
+     0.0,
+     -5.0,
+     5.5,
+     0.11
+    ],
+    [
+     0.4,
+     -4.0,
+     6.0,
+     0.11
+    ],
+    [
+     1.2,
+     18.0,
+     3.5,
+     1.2
+    ],
+    [
+     2.0,
+     36.8,
+     2.0,
+     0.11
+    ],
+    [
+     2.6,
+     38.8,
+     1.3,
+     0.11
+    ],
+    [
+     3.2,
+     41.6,
+     0.4,
+     0.11
+    ],
+    [
+     3.7,
+     46.5,
+     0.2,
+     2.4
+    ],
+    [
+     4.2,
+     52.6,
+     0.0,
+     1.5
+    ],
+    [
+     4.8,
+     53.5,
+     -0.1,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "christian",
+     "time": "attack",
+     "numero": null,
+     "nome": "Christian",
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -5.0,
+       5.5
+      ],
+      [
+       0.4,
+       -4.0,
+       6.0
+      ],
+      [
+       1.2,
+       -1.0,
+       6.5
+      ],
+      [
+       2.5,
+       3.0,
+       7.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "alex",
+     "time": "attack",
+     "numero": null,
+     "nome": "Alex",
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       3.5
+      ],
+      [
+       1.0,
+       33.5,
+       2.8
+      ],
+      [
+       2.0,
+       36.8,
+       2.0
+      ],
+      [
+       2.6,
+       38.6,
+       1.2
+      ],
+      [
+       3.2,
+       41.4,
+       0.4
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.0,
+       0.0
+      ],
+      [
+       6.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -3.0,
+       -20.0
+      ],
+      [
+       6.0,
+       -2.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -3.0,
+       -7.0
+      ],
+      [
+       6.0,
+       -2.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       20.0
+      ],
+      [
+       3.0,
+       -3.0,
+       20.0
+      ],
+      [
+       6.0,
+       -2.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -22.0
+      ],
+      [
+       3.0,
+       15.0,
+       -22.0
+      ],
+      [
+       6.0,
+       16.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -7.5
+      ],
+      [
+       3.0,
+       15.0,
+       -7.5
+      ],
+      [
+       6.0,
+       16.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       7.5
+      ],
+      [
+       3.0,
+       15.0,
+       7.5
+      ],
+      [
+       6.0,
+       16.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       22.0
+      ],
+      [
+       3.0,
+       15.0,
+       22.0
+      ],
+      [
+       6.0,
+       16.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#00703c",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       -5.0
+      ],
+      [
+       3.0,
+       31.0,
+       -5.0
+      ],
+      [
+       6.0,
+       32.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "emerson",
+     "time": "defense",
+     "numero": null,
+     "nome": "Émerson",
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       39.5,
+       3.0
+      ],
+      [
+       2.0,
+       39.4,
+       2.6
+      ],
+      [
+       3.2,
+       40.3,
+       1.9
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "ceni",
+     "time": "defense",
+     "numero": 1,
+     "nome": "Rogério Ceni",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       49.5,
+       0.0
+      ],
+      [
+       2.0,
+       48.0,
+       0.2
+      ],
+      [
+       2.8,
+       46.6,
+       0.4
+      ],
+      [
+       3.2,
+       45.2,
+       0.5
+      ],
+      [
+       3.8,
+       46.5,
+       1.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       -20.0
+      ],
+      [
+       3.0,
+       39.0,
+       -20.0
+      ],
+      [
+       6.0,
+       40.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       -7.0
+      ],
+      [
+       3.0,
+       39.0,
+       -7.0
+      ],
+      [
+       6.0,
+       40.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       20.0
+      ],
+      [
+       3.0,
+       39.0,
+       20.0
+      ],
+      [
+       6.0,
+       40.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       -22.0
+      ],
+      [
+       3.0,
+       29.0,
+       -22.0
+      ],
+      [
+       6.0,
+       30.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       -7.5
+      ],
+      [
+       3.0,
+       29.0,
+       -7.5
+      ],
+      [
+       6.0,
+       30.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       7.5
+      ],
+      [
+       3.0,
+       29.0,
+       7.5
+      ],
+      [
+       6.0,
+       30.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       22.0
+      ],
+      [
+       3.0,
+       29.0,
+       22.0
+      ],
+      [
+       6.0,
+       30.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f8",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       -5.0
+      ],
+      [
+       3.0,
+       17.0,
+       -5.0
+      ],
+      [
+       6.0,
+       18.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f9",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       5.0
+      ],
+      [
+       3.0,
+       17.0,
+       5.0
+      ],
+      [
+       6.0,
+       18.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "rogerio-ceni-sao-paulo-corinthians-2011",
+   "titulo": "Rogério Ceni — o 100º gol",
+   "subtitulo": "São Paulo 2 × 1 Corinthians · Paulistão 2011 · 27/03/2011",
+   "grupo": "brasil",
+   "ordem": 8,
+   "contexto": "Arena Barueri, 8' do 2º tempo. O 100º gol de Rogério Ceni: falta no ângulo de Júlio César.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "São Paulo",
+    "defense": "Corinthians"
+   },
+   "finalizadorId": "ceni",
+   "chavesBola": [
+    [
+     0.0,
+     35.5,
+     8.5,
+     0.11
+    ],
+    [
+     2.5,
+     35.5,
+     8.5,
+     0.11
+    ],
+    [
+     2.68,
+     38.92,
+     7.89,
+     1.49
+    ],
+    [
+     2.86,
+     42.34,
+     6.39,
+     2.37
+    ],
+    [
+     3.04,
+     45.76,
+     4.11,
+     2.73
+    ],
+    [
+     3.22,
+     49.18,
+     1.14,
+     2.57
+    ],
+    [
+     3.4,
+     52.6,
+     -2.5,
+     1.91
+    ],
+    [
+     3.8,
+     53.5,
+     -2.7,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "ceni",
+     "time": "attack",
+     "numero": 1,
+     "nome": "Rogério Ceni",
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       31.5,
+       10.5
+      ],
+      [
+       1.6,
+       33.6,
+       9.6
+      ],
+      [
+       2.5,
+       34.9,
+       8.8
+      ],
+      [
+       3.5,
+       36.0,
+       8.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.1,
+       0.0
+      ],
+      [
+       6.0,
+       -48.2,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -3.1,
+       -20.0
+      ],
+      [
+       6.0,
+       -2.2,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -3.1,
+       -7.0
+      ],
+      [
+       6.0,
+       -2.2,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       7.0
+      ],
+      [
+       3.0,
+       -3.1,
+       7.0
+      ],
+      [
+       6.0,
+       -2.2,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       -4.0,
+       20.0
+      ],
+      [
+       3.0,
+       -3.1,
+       20.0
+      ],
+      [
+       6.0,
+       -2.2,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       -22.0
+      ],
+      [
+       3.0,
+       16.9,
+       -22.0
+      ],
+      [
+       6.0,
+       17.8,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       -7.5
+      ],
+      [
+       3.0,
+       16.9,
+       -7.5
+      ],
+      [
+       6.0,
+       17.8,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       7.5
+      ],
+      [
+       3.0,
+       16.9,
+       7.5
+      ],
+      [
+       6.0,
+       17.8,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       22.0
+      ],
+      [
+       3.0,
+       16.9,
+       22.0
+      ],
+      [
+       6.0,
+       17.8,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f10",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#c8102e",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       -5.0
+      ],
+      [
+       3.0,
+       30.9,
+       -5.0
+      ],
+      [
+       6.0,
+       31.8,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "julio-cesar",
+     "time": "defense",
+     "numero": null,
+     "nome": "Júlio César",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.5,
+       0.0
+      ],
+      [
+       2.5,
+       50.4,
+       -0.5
+      ],
+      [
+       3.2,
+       51.0,
+       -1.6
+      ],
+      [
+       3.9,
+       50.8,
+       -1.9
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "muro-1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.5,
+       41.06,
+       3.16
+      ],
+      [
+       2.5,
+       43.06,
+       3.16
+      ],
+      [
+       3.5,
+       43.16,
+       3.16
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "muro-2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.5,
+       41.37,
+       3.78
+      ],
+      [
+       2.5,
+       43.37,
+       3.78
+      ],
+      [
+       3.5,
+       43.47,
+       3.78
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "muro-3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.5,
+       41.68,
+       4.41
+      ],
+      [
+       2.5,
+       43.68,
+       4.41
+      ],
+      [
+       3.5,
+       43.78,
+       4.41
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "muro-4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.5,
+       42.0,
+       5.03
+      ],
+      [
+       2.5,
+       44.0,
+       5.03
+      ],
+      [
+       3.5,
+       44.1,
+       5.03
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "muro-5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.5,
+       42.31,
+       5.66
+      ],
+      [
+       2.5,
+       44.31,
+       5.66
+      ],
+      [
+       3.5,
+       44.41,
+       5.66
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       40.0,
+       -20.0
+      ],
+      [
+       3.0,
+       40.9,
+       -20.0
+      ],
+      [
+       6.0,
+       41.8,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       31.0,
+       -22.0
+      ],
+      [
+       3.0,
+       31.9,
+       -22.0
+      ],
+      [
+       6.0,
+       32.8,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       31.0,
+       22.0
+      ],
+      [
+       3.0,
+       31.9,
+       22.0
+      ],
+      [
+       6.0,
+       32.8,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       18.0,
+       -5.0
+      ],
+      [
+       3.0,
+       18.9,
+       -5.0
+      ],
+      [
+       6.0,
+       19.8,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       18.0,
+       5.0
+      ],
+      [
+       3.0,
+       18.9,
+       5.0
+      ],
+      [
+       6.0,
+       19.8,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "ronaldinho-atletico-mg-cruzeiro-2012",
+   "titulo": "Ronaldinho — o slalom de 50 metros",
+   "subtitulo": "Atlético-MG 2 × 2 Cruzeiro · Brasileirão 2012 · 26/08/2012",
+   "grupo": "brasil",
+   "ordem": 9,
+   "contexto": "Círculo central, 89'. Slalom de cerca de 50 m driblando três. Relato de fonte única: a parte menos confiável da lista.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 12.5,
+   "times": {
+    "attack": "Atlético-MG",
+    "defense": "Cruzeiro"
+   },
+   "finalizadorId": "ronaldinho",
+   "chavesBola": [
+    [
+     0.2,
+     -5.0,
+     3.6,
+     0.11
+    ],
+    [
+     1.0,
+     0.0,
+     0.5,
+     0.11
+    ],
+    [
+     2.15,
+     7.2,
+     3.0,
+     0.11
+    ],
+    [
+     3.3,
+     13.7,
+     -2.5,
+     0.11
+    ],
+    [
+     4.83,
+     20.7,
+     2.5,
+     0.11
+    ],
+    [
+     6.33,
+     27.7,
+     -1.0,
+     0.11
+    ],
+    [
+     7.82,
+     34.7,
+     2.0,
+     0.11
+    ],
+    [
+     9.43,
+     42.7,
+     -1.5,
+     0.11
+    ],
+    [
+     10.35,
+     47.7,
+     0.5,
+     0.11
+    ],
+    [
+     10.81,
+     48.9,
+     0.4,
+     0.11
+    ],
+    [
+     11.1,
+     52.6,
+     1.5,
+     0.3
+    ],
+    [
+     11.9,
+     53.5,
+     1.6,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "passador",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -5.5,
+       4.0
+      ],
+      [
+       0.2,
+       -5.0,
+       3.6
+      ],
+      [
+       1.5,
+       -3.0,
+       3.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "ronaldinho",
+     "time": "attack",
+     "numero": null,
+     "nome": "Ronaldinho",
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       1.0,
+       0.0,
+       0.5
+      ],
+      [
+       2.15,
+       6.5,
+       3.0
+      ],
+      [
+       3.3,
+       13.0,
+       -2.5
+      ],
+      [
+       4.83,
+       20.0,
+       2.5
+      ],
+      [
+       6.33,
+       27.0,
+       -1.0
+      ],
+      [
+       7.82,
+       34.0,
+       2.0
+      ],
+      [
+       9.43,
+       42.0,
+       -1.5
+      ],
+      [
+       10.35,
+       47.0,
+       0.5
+      ],
+      [
+       10.81,
+       48.6,
+       0.4
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       6.25,
+       -49.0,
+       0.0
+      ],
+      [
+       12.5,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -20.0,
+       -20.0
+      ],
+      [
+       6.25,
+       -19.0,
+       -20.0
+      ],
+      [
+       12.5,
+       -18.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -20.0,
+       -7.0
+      ],
+      [
+       6.25,
+       -19.0,
+       -7.0
+      ],
+      [
+       12.5,
+       -18.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -20.0,
+       7.0
+      ],
+      [
+       6.25,
+       -19.0,
+       7.0
+      ],
+      [
+       12.5,
+       -18.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -20.0,
+       20.0
+      ],
+      [
+       6.25,
+       -19.0,
+       20.0
+      ],
+      [
+       12.5,
+       -18.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -2.0,
+       -22.0
+      ],
+      [
+       6.25,
+       -1.0,
+       -22.0
+      ],
+      [
+       12.5,
+       0.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -2.0,
+       22.0
+      ],
+      [
+       6.25,
+       -1.0,
+       22.0
+      ],
+      [
+       12.5,
+       0.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       -5.0
+      ],
+      [
+       6.25,
+       9.0,
+       -5.0
+      ],
+      [
+       12.5,
+       10.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       5.0
+      ],
+      [
+       6.25,
+       9.0,
+       5.0
+      ],
+      [
+       12.5,
+       10.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defensor-1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       7.5,
+       0.0
+      ],
+      [
+       2.15,
+       7.8,
+       0.5
+      ],
+      [
+       3.3,
+       8.4,
+       -0.3
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defensor-2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       0.2
+      ],
+      [
+       3.3,
+       12.0,
+       0.0
+      ],
+      [
+       5.2,
+       12.5,
+       -0.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defensor-3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       18.5,
+       -1.2
+      ],
+      [
+       4.83,
+       18.5,
+       -1.0
+      ],
+      [
+       6.33,
+       19.0,
+       -0.6
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "goleiro",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.0,
+       0.0
+      ],
+      [
+       8.1,
+       49.8,
+       0.0
+      ],
+      [
+       10.81,
+       50.0,
+       -1.2
+      ],
+      [
+       11.5,
+       51.2,
+       -1.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       -20.0
+      ],
+      [
+       6.25,
+       35.0,
+       -20.0
+      ],
+      [
+       12.5,
+       36.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       -7.0
+      ],
+      [
+       6.25,
+       35.0,
+       -7.0
+      ],
+      [
+       12.5,
+       36.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       7.0
+      ],
+      [
+       6.25,
+       35.0,
+       7.0
+      ],
+      [
+       12.5,
+       36.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       34.0,
+       20.0
+      ],
+      [
+       6.25,
+       35.0,
+       20.0
+      ],
+      [
+       12.5,
+       36.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       -22.0
+      ],
+      [
+       6.25,
+       25.0,
+       -22.0
+      ],
+      [
+       12.5,
+       26.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       7.5
+      ],
+      [
+       6.25,
+       25.0,
+       7.5
+      ],
+      [
+       12.5,
+       26.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       22.0
+      ],
+      [
+       6.25,
+       25.0,
+       22.0
+      ],
+      [
+       12.5,
+       26.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "wendell-lira-goianesia-atletico-go-2015",
+   "titulo": "Wendell Lira — a meia-bicicleta",
+   "subtitulo": "Goianésia 2 × 1 Atlético-GO · Goiano 2015 · 11/03/2015",
+   "grupo": "brasil",
+   "ordem": 10,
+   "contexto": "Serra Dourada. Bola alta de Da Matta e meia-bicicleta no canto do goleiro Márcio. Prêmio Puskás 2015.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "Goianésia",
+    "defense": "Atlético-GO"
+   },
+   "finalizadorId": "wendell-lira",
+   "chavesBola": [
+    [
+     0.0,
+     32.0,
+     21.5,
+     0.11
+    ],
+    [
+     1.1,
+     37.5,
+     12.0,
+     4.0
+    ],
+    [
+     2.0,
+     42.0,
+     1.4,
+     2.2
+    ],
+    [
+     2.3,
+     47.0,
+     -0.6,
+     2.1
+    ],
+    [
+     2.6,
+     52.6,
+     -2.9,
+     2.0
+    ],
+    [
+     3.4,
+     53.5,
+     -3.0,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "da-matta",
+     "time": "attack",
+     "numero": null,
+     "nome": "Da Matta",
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       32.0,
+       21.5
+      ],
+      [
+       0.6,
+       33.0,
+       21.0
+      ],
+      [
+       2.0,
+       35.0,
+       19.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "wendell-lira",
+     "time": "attack",
+     "numero": null,
+     "nome": "Wendell Lira",
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       39.5,
+       0.0
+      ],
+      [
+       1.0,
+       40.8,
+       0.6
+      ],
+      [
+       1.6,
+       41.6,
+       1.1
+      ],
+      [
+       2.0,
+       42.0,
+       1.4
+      ],
+      [
+       2.6,
+       43.5,
+       1.2
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.0,
+       0.0
+      ],
+      [
+       6.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -5.0,
+       -20.0
+      ],
+      [
+       6.0,
+       -4.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -5.0,
+       -7.0
+      ],
+      [
+       6.0,
+       -4.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       7.0
+      ],
+      [
+       3.0,
+       -5.0,
+       7.0
+      ],
+      [
+       6.0,
+       -4.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       20.0
+      ],
+      [
+       3.0,
+       -5.0,
+       20.0
+      ],
+      [
+       6.0,
+       -4.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -22.0
+      ],
+      [
+       3.0,
+       15.0,
+       -22.0
+      ],
+      [
+       6.0,
+       16.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -7.5
+      ],
+      [
+       3.0,
+       15.0,
+       -7.5
+      ],
+      [
+       6.0,
+       16.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       7.5
+      ],
+      [
+       3.0,
+       15.0,
+       7.5
+      ],
+      [
+       6.0,
+       16.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f7a3a",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       22.0
+      ],
+      [
+       3.0,
+       15.0,
+       22.0
+      ],
+      [
+       6.0,
+       16.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "marcio",
+     "time": "defense",
+     "numero": null,
+     "nome": "Márcio",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.0,
+       0.0
+      ],
+      [
+       1.5,
+       49.8,
+       0.0
+      ],
+      [
+       2.0,
+       49.8,
+       0.9
+      ],
+      [
+       2.6,
+       50.4,
+       1.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       40.0,
+       -20.0
+      ],
+      [
+       3.0,
+       41.0,
+       -20.0
+      ],
+      [
+       6.0,
+       42.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       40.0,
+       -7.0
+      ],
+      [
+       3.0,
+       41.0,
+       -7.0
+      ],
+      [
+       6.0,
+       42.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       40.0,
+       7.0
+      ],
+      [
+       3.0,
+       41.0,
+       7.0
+      ],
+      [
+       6.0,
+       42.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       40.0,
+       20.0
+      ],
+      [
+       3.0,
+       41.0,
+       20.0
+      ],
+      [
+       6.0,
+       42.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       -22.0
+      ],
+      [
+       3.0,
+       31.0,
+       -22.0
+      ],
+      [
+       6.0,
+       32.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       -7.5
+      ],
+      [
+       3.0,
+       31.0,
+       -7.5
+      ],
+      [
+       6.0,
+       32.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       7.5
+      ],
+      [
+       3.0,
+       31.0,
+       7.5
+      ],
+      [
+       6.0,
+       32.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f8",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       22.0
+      ],
+      [
+       3.0,
+       31.0,
+       22.0
+      ],
+      [
+       6.0,
+       32.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f9",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       18.0,
+       -5.0
+      ],
+      [
+       3.0,
+       19.0,
+       -5.0
+      ],
+      [
+       6.0,
+       20.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f10",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#d7261e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       18.0,
+       5.0
+      ],
+      [
+       3.0,
+       19.0,
+       5.0
+      ],
+      [
+       6.0,
+       20.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "guilherme-madruga-botafogo-sp-novorizontino-2023",
+   "titulo": "Guilherme Madruga — a bicicleta de fora da área",
+   "subtitulo": "Botafogo-SP 1 × 0 Novorizontino · Série B 2023 · 27/06/2023",
+   "grupo": "brasil",
+   "ordem": 11,
+   "contexto": "Novo Horizonte, 36'. Lateral para a área, a defesa afasta mal; bicicleta de fora da área no canto do goleiro Jordi. Prêmio Puskás 2023.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "Botafogo-SP",
+    "defense": "Novorizontino"
+   },
+   "finalizadorId": "madruga",
+   "chavesBola": [
+    [
+     0.0,
+     30.0,
+     33.8,
+     0.11
+    ],
+    [
+     0.9,
+     34.0,
+     19.0,
+     2.4
+    ],
+    [
+     1.8,
+     37.0,
+     9.6,
+     2.0
+    ],
+    [
+     2.4,
+     33.0,
+     3.1,
+     0.11
+    ],
+    [
+     3.0,
+     32.6,
+     2.6,
+     1.8
+    ],
+    [
+     3.5,
+     42.0,
+     -0.8,
+     3.2
+    ],
+    [
+     3.9,
+     52.6,
+     -2.7,
+     1.9
+    ],
+    [
+     4.4,
+     53.5,
+     -2.9,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "lateral",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       29.5,
+       34.2
+      ],
+      [
+       0.8,
+       30.0,
+       33.6
+      ],
+      [
+       1.8,
+       31.0,
+       32.5
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "madruga",
+     "time": "attack",
+     "numero": null,
+     "nome": "Guilherme Madruga",
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       30.0,
+       1.0
+      ],
+      [
+       1.8,
+       31.8,
+       2.0
+      ],
+      [
+       2.4,
+       32.6,
+       2.4
+      ],
+      [
+       3.0,
+       32.8,
+       2.6
+      ],
+      [
+       3.8,
+       33.5,
+       3.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.0,
+       0.0
+      ],
+      [
+       6.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -7.0,
+       -20.0
+      ],
+      [
+       6.0,
+       -6.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -7.0,
+       -7.0
+      ],
+      [
+       6.0,
+       -6.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       7.0
+      ],
+      [
+       3.0,
+       -7.0,
+       7.0
+      ],
+      [
+       6.0,
+       -6.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       20.0
+      ],
+      [
+       3.0,
+       -7.0,
+       20.0
+      ],
+      [
+       6.0,
+       -6.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -22.0
+      ],
+      [
+       3.0,
+       13.0,
+       -22.0
+      ],
+      [
+       6.0,
+       14.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -7.5
+      ],
+      [
+       3.0,
+       13.0,
+       -7.5
+      ],
+      [
+       6.0,
+       14.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       7.5
+      ],
+      [
+       3.0,
+       13.0,
+       7.5
+      ],
+      [
+       6.0,
+       14.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#111111",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       -5.0
+      ],
+      [
+       3.0,
+       27.0,
+       -5.0
+      ],
+      [
+       6.0,
+       28.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "zagueiro",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       8.0
+      ],
+      [
+       1.8,
+       37.2,
+       9.4
+      ],
+      [
+       2.4,
+       36.0,
+       7.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "marcador-1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       33.0,
+       5.0
+      ],
+      [
+       2.6,
+       33.5,
+       4.2
+      ],
+      [
+       3.6,
+       34.5,
+       3.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "marcador-2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       33.0,
+       -0.5
+      ],
+      [
+       2.6,
+       33.4,
+       0.2
+      ],
+      [
+       3.6,
+       34.4,
+       0.6
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "jordi",
+     "time": "defense",
+     "numero": null,
+     "nome": "Jordi",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.5,
+       0.0
+      ],
+      [
+       2.8,
+       50.2,
+       0.2
+      ],
+      [
+       3.4,
+       50.4,
+       1.0
+      ],
+      [
+       4.0,
+       50.9,
+       1.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       -20.0
+      ],
+      [
+       3.0,
+       37.0,
+       -20.0
+      ],
+      [
+       6.0,
+       38.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       36.0,
+       20.0
+      ],
+      [
+       3.0,
+       37.0,
+       20.0
+      ],
+      [
+       6.0,
+       38.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       -22.0
+      ],
+      [
+       3.0,
+       25.0,
+       -22.0
+      ],
+      [
+       6.0,
+       26.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       -7.5
+      ],
+      [
+       3.0,
+       25.0,
+       -7.5
+      ],
+      [
+       6.0,
+       26.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       24.0,
+       22.0
+      ],
+      [
+       3.0,
+       25.0,
+       22.0
+      ],
+      [
+       6.0,
+       26.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -5.0
+      ],
+      [
+       3.0,
+       13.0,
+       -5.0
+      ],
+      [
+       6.0,
+       14.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f2c200",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       5.0
+      ],
+      [
+       3.0,
+       13.0,
+       5.0
+      ],
+      [
+       6.0,
+       14.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "alerrandro-vitoria-cruzeiro-2024",
+   "titulo": "Alerrandro — a bicicleta de primeira",
+   "subtitulo": "Vitória 2 × 2 Cruzeiro · Brasileirão 2024 · 19/08/2024",
+   "grupo": "brasil",
+   "ordem": 12,
+   "contexto": "Barradão, 28'. Bola cortada para o alto por João Marcelo; bicicleta de primeira por cima de Cássio. Finalista do Puskás 2024.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "Vitória",
+    "defense": "Cruzeiro"
+   },
+   "finalizadorId": "alerrandro",
+   "chavesBola": [
+    [
+     0.0,
+     8.5,
+     -6.2,
+     0.11
+    ],
+    [
+     0.2,
+     9.0,
+     -6.0,
+     0.11
+    ],
+    [
+     1.2,
+     23.8,
+     -3.0,
+     0.9
+    ],
+    [
+     1.7,
+     27.0,
+     -2.4,
+     3.0
+    ],
+    [
+     2.5,
+     34.5,
+     -1.5,
+     2.0
+    ],
+    [
+     3.0,
+     41.0,
+     -1.0,
+     1.7
+    ],
+    [
+     3.5,
+     47.0,
+     -1.6,
+     2.5
+    ],
+    [
+     3.9,
+     52.6,
+     -2.0,
+     2.1
+    ],
+    [
+     4.5,
+     53.5,
+     -2.1,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "passador",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       -6.5
+      ],
+      [
+       0.2,
+       9.0,
+       -6.0
+      ],
+      [
+       1.5,
+       12.0,
+       -5.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "alerrandro",
+     "time": "attack",
+     "numero": null,
+     "nome": "Alerrandro",
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       35.0,
+       -3.5
+      ],
+      [
+       1.8,
+       38.0,
+       -2.2
+      ],
+      [
+       2.7,
+       40.0,
+       -1.4
+      ],
+      [
+       3.0,
+       40.6,
+       -1.2
+      ],
+      [
+       3.8,
+       42.5,
+       -0.6
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.0,
+       0.0
+      ],
+      [
+       6.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -7.0,
+       -20.0
+      ],
+      [
+       6.0,
+       -6.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -7.0,
+       -7.0
+      ],
+      [
+       6.0,
+       -6.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       7.0
+      ],
+      [
+       3.0,
+       -7.0,
+       7.0
+      ],
+      [
+       6.0,
+       -6.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -8.0,
+       20.0
+      ],
+      [
+       3.0,
+       -7.0,
+       20.0
+      ],
+      [
+       6.0,
+       -6.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       -22.0
+      ],
+      [
+       3.0,
+       9.0,
+       -22.0
+      ],
+      [
+       6.0,
+       10.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       7.5
+      ],
+      [
+       3.0,
+       9.0,
+       7.5
+      ],
+      [
+       6.0,
+       10.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       8.0,
+       22.0
+      ],
+      [
+       3.0,
+       9.0,
+       22.0
+      ],
+      [
+       6.0,
+       10.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.0,
+       5.0
+      ],
+      [
+       3.0,
+       27.0,
+       5.0
+      ],
+      [
+       6.0,
+       28.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "joao-marcelo",
+     "time": "defense",
+     "numero": null,
+     "nome": "João Marcelo",
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       21.0,
+       -4.5
+      ],
+      [
+       1.2,
+       23.6,
+       -3.0
+      ],
+      [
+       2.2,
+       26.0,
+       -2.5
+      ],
+      [
+       3.2,
+       31.0,
+       -1.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "cassio",
+     "time": "defense",
+     "numero": null,
+     "nome": "Cássio",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       49.5,
+       0.0
+      ],
+      [
+       2.5,
+       49.2,
+       0.0
+      ],
+      [
+       3.0,
+       48.2,
+       0.4
+      ],
+      [
+       3.6,
+       48.4,
+       1.6
+      ],
+      [
+       4.2,
+       49.0,
+       2.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       32.0,
+       -20.0
+      ],
+      [
+       3.0,
+       33.0,
+       -20.0
+      ],
+      [
+       6.0,
+       34.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       32.0,
+       -7.0
+      ],
+      [
+       3.0,
+       33.0,
+       -7.0
+      ],
+      [
+       6.0,
+       34.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       32.0,
+       7.0
+      ],
+      [
+       3.0,
+       33.0,
+       7.0
+      ],
+      [
+       6.0,
+       34.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       32.0,
+       20.0
+      ],
+      [
+       3.0,
+       33.0,
+       20.0
+      ],
+      [
+       6.0,
+       34.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       22.0,
+       -22.0
+      ],
+      [
+       3.0,
+       23.0,
+       -22.0
+      ],
+      [
+       6.0,
+       24.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f6",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       22.0,
+       7.5
+      ],
+      [
+       3.0,
+       23.0,
+       7.5
+      ],
+      [
+       6.0,
+       24.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f7",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       22.0,
+       22.0
+      ],
+      [
+       3.0,
+       23.0,
+       22.0
+      ],
+      [
+       6.0,
+       24.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f8",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       -5.0
+      ],
+      [
+       3.0,
+       13.0,
+       -5.0
+      ],
+      [
+       6.0,
+       14.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f9",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#1f4fa3",
+     "borda": "#f5f5f5",
+     "chaves": [
+      [
+       0.0,
+       12.0,
+       5.0
+      ],
+      [
+       3.0,
+       13.0,
+       5.0
+      ],
+      [
+       6.0,
+       14.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  },
+  {
+   "id": "pedro-flamengo-vitoria-2025",
+   "titulo": "Pedro — o elástico e a encobrida",
+   "subtitulo": "Flamengo 8 × 0 Vitória · Brasileirão 2025 · 25/08/2025",
+   "grupo": "brasil",
+   "ordem": 13,
+   "contexto": "Maracanã. Trivela de Samuel Lino, elástico em Lucas Halter e encobrida no goleiro Lucas Arcanjo, que saía. Pedro deixa quatro marcadores para trás.",
+   "fonte": "Reconstrução aproximada a partir de relatos (sem dados de posição)",
+   "roteiro": true,
+   "aproximado": true,
+   "duracao": 6.0,
+   "times": {
+    "attack": "Flamengo",
+    "defense": "Vitória"
+   },
+   "finalizadorId": "pedro",
+   "chavesBola": [
+    [
+     0.0,
+     27.0,
+     25.0,
+     0.11
+    ],
+    [
+     0.45,
+     32.0,
+     14.5,
+     0.11
+    ],
+    [
+     0.9,
+     36.0,
+     6.5,
+     0.11
+    ],
+    [
+     1.3,
+     37.6,
+     3.4,
+     0.11
+    ],
+    [
+     1.9,
+     40.2,
+     1.4,
+     0.11
+    ],
+    [
+     2.5,
+     42.4,
+     0.6,
+     0.11
+    ],
+    [
+     3.0,
+     46.5,
+     0.4,
+     2.3
+    ],
+    [
+     3.5,
+     52.6,
+     0.0,
+     1.5
+    ],
+    [
+     4.1,
+     53.5,
+     -0.1,
+     0.0
+    ]
+   ],
+   "jogadores": [
+    {
+     "id": "samuel-lino",
+     "time": "attack",
+     "numero": null,
+     "nome": "Samuel Lino",
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       26.5,
+       25.5
+      ],
+      [
+       0.8,
+       28.0,
+       24.0
+      ],
+      [
+       1.6,
+       30.0,
+       21.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "pedro",
+     "time": "attack",
+     "numero": 9,
+     "nome": "Pedro",
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       33.5,
+       10.0
+      ],
+      [
+       0.9,
+       35.8,
+       6.6
+      ],
+      [
+       1.3,
+       37.0,
+       4.0
+      ],
+      [
+       1.9,
+       39.5,
+       1.6
+      ],
+      [
+       2.5,
+       42.2,
+       0.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "attack-f1",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -50.0,
+       0.0
+      ],
+      [
+       3.0,
+       -49.0,
+       0.0
+      ],
+      [
+       6.0,
+       -48.0,
+       0.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f2",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       -20.0
+      ],
+      [
+       3.0,
+       -5.0,
+       -20.0
+      ],
+      [
+       6.0,
+       -4.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f3",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       -7.0
+      ],
+      [
+       3.0,
+       -5.0,
+       -7.0
+      ],
+      [
+       6.0,
+       -4.0,
+       -7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f4",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       7.0
+      ],
+      [
+       3.0,
+       -5.0,
+       7.0
+      ],
+      [
+       6.0,
+       -4.0,
+       7.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f5",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       -6.0,
+       20.0
+      ],
+      [
+       3.0,
+       -5.0,
+       20.0
+      ],
+      [
+       6.0,
+       -4.0,
+       20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f6",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -22.0
+      ],
+      [
+       3.0,
+       15.0,
+       -22.0
+      ],
+      [
+       6.0,
+       16.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f7",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       -7.5
+      ],
+      [
+       3.0,
+       15.0,
+       -7.5
+      ],
+      [
+       6.0,
+       16.0,
+       -7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f8",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       14.0,
+       7.5
+      ],
+      [
+       3.0,
+       15.0,
+       7.5
+      ],
+      [
+       6.0,
+       16.0,
+       7.5
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "attack-f9",
+     "time": "attack",
+     "numero": null,
+     "nome": null,
+     "cor": "#c8102e",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       -5.0
+      ],
+      [
+       3.0,
+       29.0,
+       -5.0
+      ],
+      [
+       6.0,
+       30.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "halter",
+     "time": "defense",
+     "numero": null,
+     "nome": "Lucas Halter",
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       38.5,
+       6.5
+      ],
+      [
+       1.3,
+       38.4,
+       4.8
+      ],
+      [
+       2.4,
+       39.6,
+       3.8
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "marcador-a",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       38.0,
+       9.0
+      ],
+      [
+       1.8,
+       38.2,
+       8.8
+      ],
+      [
+       3.0,
+       39.0,
+       8.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "marcador-b",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       40.0,
+       6.0
+      ],
+      [
+       1.8,
+       40.3,
+       5.6
+      ],
+      [
+       3.0,
+       40.8,
+       5.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "marcador-c",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       41.0,
+       -2.0
+      ],
+      [
+       1.8,
+       41.2,
+       -2.2
+      ],
+      [
+       3.0,
+       41.8,
+       -2.4
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "marcador-d",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       44.0,
+       2.5
+      ],
+      [
+       1.8,
+       44.2,
+       2.4
+      ],
+      [
+       3.0,
+       44.8,
+       2.0
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "arcanjo",
+     "time": "defense",
+     "numero": null,
+     "nome": "Lucas Arcanjo",
+     "cor": "#7fb800",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       50.0,
+       0.0
+      ],
+      [
+       1.5,
+       48.6,
+       0.2
+      ],
+      [
+       2.5,
+       46.0,
+       0.4
+      ],
+      [
+       3.0,
+       45.6,
+       0.6
+      ],
+      [
+       3.8,
+       46.2,
+       0.9
+      ]
+     ],
+     "estimado": false
+    },
+    {
+     "id": "defense-f1",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       40.0,
+       -20.0
+      ],
+      [
+       3.0,
+       41.0,
+       -20.0
+      ],
+      [
+       6.0,
+       42.0,
+       -20.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f2",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       -22.0
+      ],
+      [
+       3.0,
+       29.0,
+       -22.0
+      ],
+      [
+       6.0,
+       30.0,
+       -22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f3",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       28.0,
+       22.0
+      ],
+      [
+       3.0,
+       29.0,
+       22.0
+      ],
+      [
+       6.0,
+       30.0,
+       22.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f4",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       -5.0
+      ],
+      [
+       3.0,
+       17.0,
+       -5.0
+      ],
+      [
+       6.0,
+       18.0,
+       -5.0
+      ]
+     ],
+     "estimado": true
+    },
+    {
+     "id": "defense-f5",
+     "time": "defense",
+     "numero": null,
+     "nome": null,
+     "cor": "#f5f5f5",
+     "borda": "#111111",
+     "chaves": [
+      [
+       0.0,
+       16.0,
+       5.0
+      ],
+      [
+       3.0,
+       17.0,
+       5.0
+      ],
+      [
+       6.0,
+       18.0,
+       5.0
+      ]
+     ],
+     "estimado": true
+    }
+   ]
+  }
+ ]
+}
