@@ -1313,7 +1313,10 @@ $('#ed-descartar').onclick = () => {
     estado.lances.splice(i, 1); estado.lance = null; liberarBonecos(l);
     preencherLances();
     const prox = estado.lances.find((x) => x.grupo === 'hypados') || estado.lances[0];
-    if (!prox) { alternarEditor(false); $('#carregando').textContent = 'Nenhum lance disponível. Recarregue a página.'; $('#carregando').hidden = false; return; }
+    if (!prox) {   // catálogo vazio: nada clicável que dependa de um lance ativo
+      alternarEditor(false); $('#lista-jogadores').replaceChildren(); estado.sel = null;
+      $('#carregando').textContent = 'Nenhum lance disponível. Recarregue a página.'; $('#carregando').hidden = false; return;
+    }
     $('#sel-lance').value = estado.lances.indexOf(prox); carregarLance(prox);
     return;
   }
@@ -1507,7 +1510,7 @@ document.querySelectorAll('#seg-estilo button').forEach((b) => (b.onclick = () =
 $('#rng-fov').oninput = (e) => { estado.fov = +e.target.value; $('#out-fov').textContent = `${estado.fov}°`; };
 $('#chk-rotulos').onchange = (e) => (estado.rotulos = e.target.checked);
 $('#chk-sombras').onchange = (e) => { estado.sombras = e.target.checked; sol.castShadow = estado.sombras && ESTILOS[estado.estilo].sombras; };
-$('#btn-finalizador').onclick = () => selecionar(estado.lance.finalizador);
+$('#btn-finalizador').onclick = () => { if (estado.lance) selecionar(estado.lance.finalizador); };
 $('#btn-play').onclick = () => {
   if (estado.gravando) return;
   if (!estado.tocando && estado.t >= estado.lance.frames - 1) estado.t = 0;
