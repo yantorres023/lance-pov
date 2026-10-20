@@ -26,6 +26,18 @@
         <label for="sel-lance">Lance</label>
         <select id="sel-lance"></select>
         <p id="meta" class="meta"></p>
+        <p id="aviso-aprox" class="aviso" hidden></p>
+      </section>
+
+      <section>
+        <label>Visual</label>
+        <div id="seg-estilo" class="estilos">
+          <button data-v="realista" class="ativo"><i class="amostra realista"></i>Realista</button>
+          <button data-v="palitos-claro"><i class="amostra palitos-claro"></i>Palitos</button>
+          <button data-v="palitos-escuro"><i class="amostra palitos-escuro"></i>Palitos escuro</button>
+          <button data-v="blocos" title="Inspirado no Minecraft"><i class="amostra blocos"></i>Blocos</button>
+          <button data-v="bloquinho" title="Inspirado no Roblox"><i class="amostra bloquinho"></i>Bloquinho</button>
+        </div>
       </section>
 
       <section class="crescer">
@@ -53,7 +65,8 @@
       </section>
 
       <footer>
-        Dados: <a href="https://github.com/Friends-of-Tracking-Data-FoTD/Last-Row" target="_blank" rel="noopener">Last-Row / Friends of Tracking</a> (@lastrowview). Posições aproximadas, coletadas à mão; nem todos os jogadores estão no dado.
+        <span id="fonte-lance"></span><br>
+        Dados: <a href="https://github.com/statsbomb/open-data" target="_blank" rel="noopener">StatsBomb Open Data</a> (eventos e posições no chute; o resto do movimento é reconstruído) e <a href="https://github.com/Friends-of-Tracking-Data-FoTD/Last-Row" target="_blank" rel="noopener">Last-Row / Friends of Tracking</a>. Gols do futebol brasileiro: reconstruções aproximadas. Projeto pessoal, sem fins comerciais.
       </footer>
     </aside>
 
@@ -81,6 +94,7 @@
         <div id="trilho">
           <input type="range" id="rng-tempo" min="0" max="100" step="0.01" value="0">
           <i id="marca-gol" title="Gol"></i>
+          <div id="marcas-chaves"></div>
         </div>
         <select id="sel-vel" title="Velocidade">
           <option value="0.25">0,25×</option>
@@ -88,7 +102,27 @@
           <option value="1" selected>1×</option>
           <option value="2">2×</option>
         </select>
+        <button id="btn-editar" class="secundario" title="Editar posições do lance (quadros-chave)">✎ Editar</button>
         <button id="btn-gravar" title="Grava o lance inteiro, do início ao fim, na vista atual">● Gravar vídeo</button>
+      </div>
+
+      <div id="editor" class="flutuante" hidden>
+        <div class="ed-topo"><strong>Editor de lance</strong><button id="ed-fechar" class="link" title="Sair do editor">fechar</button></div>
+        <p class="ed-dica">Na vista de cima, arraste um jogador ou a bola. Cada arraste grava um quadro-chave no instante atual; o resto é interpolado. Avance com ← → ou com a linha do tempo.</p>
+        <div class="ed-linha"><span>Editando: <b id="ed-alvo">—</b></span><button id="ed-bola" class="mini">bola</button></div>
+        <div class="ed-linha"><span id="ed-chaves"></span>
+          <span><button id="ed-ant" class="mini" title="Quadro-chave anterior">◀</button><button id="ed-prox" class="mini" title="Próximo quadro-chave">▶</button><button id="ed-apagar" class="mini" title="Apagar o quadro-chave deste instante (Delete)">apagar</button></span></div>
+        <div class="ed-linha" id="ed-altura-linha" hidden><label for="ed-altura">Altura da bola</label><input type="range" id="ed-altura" min="0" max="6" step="0.05"></div>
+        <div class="ed-linha"><label for="ed-duracao">Duração (s)</label><input type="number" id="ed-duracao" min="2" max="60" step="0.5"></div>
+        <div class="ed-botoes">
+          <button id="ed-exportar">Exportar JSON</button>
+          <button id="ed-importar">Importar JSON</button>
+          <button id="ed-novo">Novo lance do zero</button>
+          <button id="ed-descartar">Descartar rascunho</button>
+        </div>
+        <p id="ed-status" class="ed-dica"></p>
+        <p id="ed-aviso" class="ed-dica"></p>
+        <input type="file" id="arquivo-importar" accept="application/json,.json" hidden>
       </div>
 
       <div id="carregando">Carregando lances…</div>
