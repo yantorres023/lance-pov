@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lance POV</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <aside id="painel">
+      <header>
+        <h1>Lance <span>POV</span></h1>
+        <p>O lance pelos olhos de quem estava em campo.</p>
+      </header>
+
+      <section>
+        <label for="sel-lance">Lance</label>
+        <select id="sel-lance"></select>
+        <p id="meta" class="meta"></p>
+      </section>
+
+      <section class="crescer">
+        <div class="titulo-secao">
+          <label>Jogador</label>
+          <button id="btn-finalizador" class="link" title="Selecionar quem fez o gol">quem fez o gol</button>
+        </div>
+        <div id="lista-jogadores"></div>
+      </section>
+
+      <section>
+        <label>Para onde ele olha</label>
+        <div class="segmentado" id="seg-olhar">
+          <button data-v="misto" class="ativo" title="Corpo segue a corrida, cabeça acompanha a bola até o limite do pescoço">Natural</button>
+          <button data-v="bola" title="Sempre na bola">Bola</button>
+          <button data-v="corrida" title="Para onde está correndo">Corrida</button>
+        </div>
+        <label for="rng-fov">Campo de visão <output id="out-fov">75°</output></label>
+        <input type="range" id="rng-fov" min="45" max="110" value="75">
+      </section>
+
+      <section class="opcoes">
+        <label><input type="checkbox" id="chk-rotulos" checked> Nomes sobre os jogadores</label>
+        <label><input type="checkbox" id="chk-sombras" checked> Sombras</label>
+      </section>
+
+      <footer>
+        Dados: <a href="https://github.com/Friends-of-Tracking-Data-FoTD/Last-Row" target="_blank" rel="noopener">Last-Row / Friends of Tracking</a> (@lastrowview). Posições aproximadas, coletadas à mão; nem todos os jogadores estão no dado.
+      </footer>
+    </aside>
+
+    <main id="palco">
+      <canvas id="cena"></canvas>
+
+      <div id="vistas" class="segmentado flutuante">
+        <button data-v="pov" class="ativo" title="1">1ª pessoa</button>
+        <button data-v="terceira" title="2">Atrás dele</button>
+        <button data-v="tv" title="3">TV</button>
+        <button data-v="drone" title="4">Livre</button>
+        <button data-v="tatica" title="5">Tática</button>
+      </div>
+
+      <div id="hud" class="flutuante">
+        <strong id="hud-nome">—</strong>
+        <span id="hud-dados"></span>
+      </div>
+
+      <canvas id="minimapa" width="252" height="168" title="Clique num jogador para ver pelos olhos dele"></canvas>
+
+      <div id="controles" class="flutuante">
+        <button id="btn-play" class="redondo" title="Espaço">▶</button>
+        <span id="tempo">0,0 s</span>
+        <div id="trilho">
+          <input type="range" id="rng-tempo" min="0" max="100" step="0.01" value="0">
+          <i id="marca-gol" title="Gol"></i>
+        </div>
+        <select id="sel-vel" title="Velocidade">
+          <option value="0.25">0,25×</option>
+          <option value="0.5">0,5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+        </select>
+        <button id="btn-gravar" title="Grava o lance inteiro, do início ao fim, na vista atual">● Gravar vídeo</button>
+      </div>
+
+      <div id="carregando">Carregando lances…</div>
+    </main>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

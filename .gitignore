@@ -1,0 +1,7 @@
+# cache de downloads (grande; regenerável pelos scripts)
+data/raw/statsbomb/
+# notas internas do projeto
+CLAUDE.md
+.claude/
+__pycache__/
+*.webm
