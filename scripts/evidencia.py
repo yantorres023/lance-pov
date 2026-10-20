@@ -82,6 +82,9 @@ def avaliar(fps, n, segs, dist_orig, pos_fn, bola_fn, bola_orig, janelas, recusa
                 out["ok"] += 1
                 continue
             d0 = dists[f - a] if 0 <= f - a < len(dists) else None
+            if d0 is not None and d0 <= A_LIMITE_M:   # o original atendia e a correção piorou: falha, sem exceção
+                out["falhas"].append((pid, f, round(d, 2), f"correcao piorou: original {d0:.2f} m"))
+                continue
             rec = (recusados or {}).get((pid, f))
             m = motivo(bola_orig, f, fps, a, b, d0, janelas.get(pid, []), rec)
             if m is None:

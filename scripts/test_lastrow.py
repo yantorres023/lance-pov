@@ -47,6 +47,7 @@ def cruzamento(bola, linha=LINHA_X):
 EXCECOES_ACEITAS = {
     "liverpool-3-0-bournemouth": {
         "max_dist": 1.4,
+        "quadros": {("14", f) for f in range(91, 101)},   # pares jogador–quadro autorizados; qualquer outro reprova
         "motivo": "decisão de 20/10/2026: dono a 1,0–1,4 m da bola em 10 quadros; a correção que fecharia a distância exigiria salto de bola; visualmente a bola segue no pé",
     },
 }
@@ -102,7 +103,7 @@ def main():
         linhas.append(f"{l.get('titulo', l['id'])[:40]:40} quadros={r['tot']:4d}  ok={r['pct_ok']:6.2f}%  "
                       f"com excecao={r['pct_just']:6.2f}%  excecoes: {exc}")
         aceita = EXCECOES_ACEITAS.get(l["id"])
-        if r["pct_just"] < EV.A_META_LANCE_PCT and aceita and r["falhas"] and all(d <= aceita["max_dist"] for _, _, d, _ in r["falhas"]):
+        if r["pct_just"] < EV.A_META_LANCE_PCT and aceita and r["falhas"] and all((str(p_), f_) in aceita["quadros"] for p_, f_, _, _ in r["falhas"]) and all(d <= aceita["max_dist"] for _, _, d, _ in r["falhas"]):
             linhas.append(f"    exceção aceita [{l['id']}]: {len(r['falhas'])} quadros a <= {aceita['max_dist']} m — {aceita['motivo']}")
         elif r["pct_just"] < EV.A_META_LANCE_PCT:
             erros.append(f"[{l['id']}] colagem (A) {r['pct_just']:.2f}% < {EV.A_META_LANCE_PCT}% (dists={[d for _, _, d, _ in r['falhas']]}) "

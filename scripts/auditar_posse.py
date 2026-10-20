@@ -212,7 +212,7 @@ def main():
                                     + ("; ".join(f"{k}={v} (ex.: {ra['exemplos'][k]})"
                                                  for k, v in ra["justificados"].items()) or "-"))
                 aceita = EXCECOES_ACEITAS.get(l["id"])
-                if pct_just < 99.0 and aceita and ra["falhas"] and all(d_ <= aceita["max_dist"] for _, _, d_, _ in ra["falhas"]):
+                if pct_just < 99.0 and aceita and ra["falhas"] and all((str(p_), f_) in aceita["quadros"] for p_, f_, _, _ in ra["falhas"]) and all(d_ <= aceita["max_dist"] for _, _, d_, _ in ra["falhas"]):
                     abaixo99.append(f"   exceção aceita: {len(ra['falhas'])} quadros a <= {aceita['max_dist']} m — {aceita['motivo']}")
                 elif pct_just < 99.0:
                     falhas_a.append(f"{l.get('ordem', '')} {l['titulo']}: {pct_just:.2f}% com excecoes; "
