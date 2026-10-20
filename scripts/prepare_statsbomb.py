@@ -17,7 +17,7 @@ Coordenadas: metros, origem no centro do campo, 105 x 68, o time que marcou atac
 eventos orientados pelo time que executa a acao; eventos do outro time sao espelhados
 (x -> 120 - x, y -> 80 - y) antes da conversao.
 
-Reconstrucao (resumo): janela de ate 16 s antes do chute (limitada ao inicio da posse) mais
+Tambem grava data/posse/statsbomb.json (segmentos de posse colados; posse.py). Reconstrucao (resumo): janela de ate 16 s antes do chute (limitada ao inicio da posse) mais
 2,5 s depois; bola por keyframes de passe/conducao/chute; jogadores por keyframes reais
 (eventos, freeze frame e 360 associado por vizinho mais proximo); interpolacao de Hermite a
 20 fps; limite de 10,5 m/s; jogadores com um ponto real alem do chute recebem movimento
@@ -33,10 +33,15 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+SCRIPTS = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPTS))
+import posse  # noqa: E402  (colagem da posse, mesmo diretorio)
+
 RAIZ = Path(__file__).resolve().parent.parent
 CACHE = RAIZ / "data" / "raw" / "statsbomb"
 SAIDA = RAIZ / "web" / "data" / "hypados.json"
 LANCES_LASTROW = RAIZ / "web" / "data" / "lances.json"
+POSSE_SAIDA = RAIZ / "data" / "posse" / "statsbomb.json"  # segmentos colados (auditoria; fora de web/)
 BASE_URL = "https://raw.githubusercontent.com/statsbomb/open-data/master/data/"
 
 FPS = 20
@@ -56,7 +61,13 @@ D_CORRIDA = 7.0  # m: percurso da corrida ate o ponto do chute (chutador com pou
 CAMPO_LIM_X = 55.5  # m: jogadores ficam ate 3 m fora das linhas de fundo
 CAMPO_LIM_Y = 37.0  # m: e 3 m fora das laterais
 GOLEIRO_LIM_X = 54.5  # m: goleiro pode ir ate a rede (dentro do gol)
-PRIO = {"chute": -1, "ev": 0, "ff": 1, "360": 2}  # menor = mais prioritario na juncao de pontos proximos
+PRIO = {"chute": -1, "ancora": -1, "ev": 0, "ff": 1, "360": 2}  # menor = mais prioritario na juncao de pontos proximos
+# Ancoras: pontos de evento com bola (conducao, recebimento, drible, inicio de passe e de chute, desarme,
+# interceptacao, corte). Nunca descartadas pela poda, nem substituidas pela sintese ou pela regra dos 80%.
+ANCORA_TIPOS = ("Carry", "Ball Receipt*", "Dribble", "Pass", "Shot", "Interception", "Ball Recovery", "Clearance")
+ANCORAS = ("chute", "ancora")
+VMAX_ANCORA = 11.5  # m/s: trecho entre duas ancoras do mesmo jogador acima de VMAX_JOG e registrado; acima disso, conflito do dado
+VEL_CORRIDA = 5.0   # m/s: corrida media da sintese antes da primeira ancora
 
 
 # ---------------------------------------------------------------------------
@@ -367,6 +378,40 @@ def cadeia_bola(eventos, gol, gol_team, desde):
     return out, t_b, fim
 
 
+def segmentos_posse(wev, t0, frames):
+    """Posse do StatsBomb em quadros: (id, ini, fim, tipo), extremos inclusivos.
+    Conducao (Carry) de t a t + duration; drible +-0,3 s; recebimento (Ball Receipt) +-0,15 s;
+    inicio de passe e de chute +-0,1 s. So eventos do periodo do gol (wev ja vem filtrado).
+    tipo: carry, dribble, receb, passe, chute (carry/dribble/passe/chute comecam na ancora)."""
+    def quadro(t):
+        return round((t - t0) * FPS)
+    out = []
+    for e in wev:
+        pl = e.get("player")
+        if not pl:
+            continue
+        typ = e["type"]["name"]
+        te = tempo(e)
+        if typ == "Carry":
+            a, b, tipo = quadro(te), quadro(te + float(e.get("duration") or 0.0)), "carry"
+        elif typ == "Dribble":
+            a, b, tipo = quadro(te - 0.3), quadro(te + 0.3), "dribble"
+        elif typ == "Ball Receipt*":
+            a, b, tipo = quadro(te - 0.15), quadro(te + 0.15), "receb"
+        elif typ == "Pass":
+            a, b, tipo = quadro(te - 0.1), quadro(te + 0.1), "passe"
+        elif typ == "Shot":
+            a, b, tipo = quadro(te - 0.1), quadro(te + 0.1), "chute"
+        elif typ in ("Interception", "Ball Recovery", "Clearance"):
+            a, b, tipo = quadro(te - 0.1), quadro(te + 0.1), "desarme"  # ancora do jogador; entrada com corte normal
+        else:
+            continue
+        a, b = max(0, a), min(frames - 1, b)
+        if a <= b:
+            out.append((str(pl["id"]), a, b, tipo))
+    return out
+
+
 def campo_m(x, y, espelhar):
     """Jardas StatsBomb -> metros no referencial do time que marcou (ataca para +x)."""
     if espelhar:
@@ -401,8 +446,35 @@ def limpar_chaves(chaves):
 
 
 def podar_chaves(ks, t_ref):
-    """Mantem o ponto do chute (t_ref) e so os pontos reais que chegam a ele sem passar de VMAX_CHAVE."""
+    """Com ancoras: todas ficam; os demais pontos so entram se chegam as ancoras vizinhas sem passar de
+    VMAX_CHAVE. Sem ancoras: so os pontos reais que chegam ao chute (t_ref) sem passar de VMAX_CHAVE."""
     ks = limpar_chaves(ks)
+    anc = [k for k in ks if k[3] in ANCORAS]
+    if anc:
+        kept = list(anc)
+        for k in ks:
+            if k[3] in ANCORAS:
+                continue
+            antes = [a for a in anc if a[0] < k[0]]
+            depois = [a for a in anc if a[0] > k[0]]
+            ok = True
+            for vizinho in ([antes[-1]] if antes else []) + ([depois[0]] if depois else []):
+                dt = abs(vizinho[0] - k[0])
+                d = math.hypot(k[1] - vizinho[1], k[2] - vizinho[2])
+                if (dt < 1e-3 and d > 1.0) or (dt >= 1e-3 and d > VMAX_CHAVE * dt):
+                    ok = False
+            if ok:
+                kept.append(k)
+        # passagem final: ponto que nao e ancora so entra se chega ao anterior mantido sem passar de VMAX_CHAVE
+        out = []
+        for k in sorted(kept, key=lambda c: c[0]):
+            if k[3] not in ANCORAS and out:
+                dt = k[0] - out[-1][0]
+                d = math.hypot(k[1] - out[-1][1], k[2] - out[-1][2])
+                if (dt < 1e-3 and d > 1.0) or (dt >= 1e-3 and d > VMAX_CHAVE * dt):
+                    continue
+            out.append(k)
+        return out
     if len(ks) <= 1:
         return ks
     ref = next((i for i, k in enumerate(ks) if abs(k[0] - t_ref) < 1e-3), None)
@@ -444,6 +516,34 @@ def caminho_real(anc, eh_chutador):
             return interp_lin(ts, ps, t)
         f = TAU * (1 - math.exp(-(t - t_ult) / TAU))
         return (x_ult + vx * f, y_ult + vy * f)
+    return pos
+
+
+def caminho_ancorado(anc, t0, eh_chutador, deslocamento_bola, ataca_para_mais):
+    """Trajetoria de jogador com ancoras: entre ancoras (e pontos aceitos) e linear (caminho_real); antes
+    da primeira ancora, uma corrida suave que chega a ela no instante certo (sintese, VEL_CORRIDA)."""
+    base = caminho_real(anc, eh_chutador)
+    t1, x1, y1 = anc[0][0], anc[0][1], anc[0][2]
+    if t1 - t0 <= 1e-6:
+        return base
+    dur = min(3.0, t1 - t0)
+    ts0 = t1 - dur
+    nb = math.hypot(deslocamento_bola[0], deslocamento_bola[1])
+    if nb >= 2.0:
+        u = (deslocamento_bola[0] / nb, deslocamento_bola[1] / nb)
+    else:
+        u = (1.0, 0.0) if ataca_para_mais else (-1.0, 0.0)
+    d = min(D_CORRIDA, VEL_CORRIDA * dur)
+    p_s = (x1 - u[0] * d, y1 - u[1] * d)
+
+    def pos(t):
+        if t >= t1:
+            return base(t)
+        if t <= ts0:
+            return p_s
+        tau = (t - ts0) / (t1 - ts0)
+        f = 3 * tau * tau - 2 * tau ** 3
+        return (p_s[0] + (x1 - p_s[0]) * f, p_s[1] + (y1 - p_s[1]) * f)
     return pos
 
 
@@ -652,11 +752,16 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
         pl = e.get("player")
         pid = str(pl["id"]) if pl else None
         if pid and loc:
-            src = "chute" if e is gol else "ev"
+            if e is gol:
+                src = "chute"
+            elif typ in ANCORA_TIPOS:
+                src = "ancora"
+            else:
+                src = "ev"
             adicionar(pid, te, campo_m(loc[0], loc[1], esp), tid, src)
         if typ == "Carry" and pid and e["carry"].get("end_location"):
             fim = e["carry"]["end_location"]
-            adicionar(pid, te + float(e.get("duration") or 0.0), campo_m(fim[0], fim[1], esp), tid, "ev")
+            adicionar(pid, te + float(e.get("duration") or 0.0), campo_m(fim[0], fim[1], esp), tid, "ancora")
         if typ == "Pass" and e["pass"].get("recipient") and e["pass"].get("end_location"):
             rec = e["pass"]["recipient"]
             fim = e["pass"]["end_location"]
@@ -736,6 +841,7 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
 
     # ---------------- jogadores: trajetorias ----------------
     pids = [pid for pid, ks in chaves.items() if any(t0 - 3.0 <= c[0] <= t_fim for c in ks)]
+    ancoras_vel, ancoras_conflito = [], []  # trechos entre duas ancoras acima de VMAX_JOG (registrados)
     if str(gol["player"]["id"]) not in pids:
         raise RuntimeError("finalizador sem chave")
     jogadores = []
@@ -748,12 +854,12 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
         passos = [math.dist(arred[i], arred[i - 1]) for i in range(1, len(arred))]
         return sum(1 for d in passos if d < 0.01) / len(passos)
 
-    def finalizar(pos_fn, pid):
+    def finalizar(pos_fn, pid, vmax=VMAX_LIMITE):
         """Amostra a 20 fps, prende ao campo (antes do limitador) e limita a velocidade."""
         serie_ = [pos_fn(t0 + i / FPS) for i in range(frames)]
         lim_x = GOLEIRO_LIM_X if pid in goleiros else CAMPO_LIM_X
         serie_, nc_ = limitar_campo(serie_, lim_x, CAMPO_LIM_Y)
-        serie_, corr_ = limitar_velocidade(serie_, VMAX_LIMITE)
+        serie_, corr_ = limitar_velocidade(serie_, vmax)
         return serie_, nc_, corr_
 
     def caminho_sintetico(anc):
@@ -773,16 +879,36 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
 
     for pid in pids:
         ks = chaves[pid]
-        anc = podar_chaves(ks, t_c)  # pontos efetivamente retidos
+        anc = podar_chaves(ks, t_c)  # pontos efetivamente retidos (ancoras sempre)
         extras = [c for c in anc if abs(c[0] - t_c) > 1e-3]
         eh_chutador = pid == str(gol["player"]["id"])
+        tem_ancora = any(c[3] == "ancora" for c in anc)
         estimado = len(extras) <= 1
         serie, nc, corr = None, 0, 0
-        if not estimado:
+        if tem_ancora:
+            # Jogador com evento de bola: real. A sintese so existe antes da primeira ancora.
+            estimado = False
+            desl = (bola_em(t_b)[0] - bola_em(t0)[0], bola_em(t_b)[1] - bola_em(t0)[1])
+            pos_fn = caminho_ancorado(anc, t0, eh_chutador, desl, time_de[pid] == gol_team)
+            # Ancoras: o limitador so atua em trecho que pede mais que VMAX_ANCORA (conflito do dado: o
+            # jogador chega atrasado ao evento seguinte, e o teste de eventos aponta isso).
+            serie, nc, corr = finalizar(pos_fn, pid, vmax=VMAX_ANCORA - 0.1)  # margem para o arredondamento
+            # Parado quase o tempo todo entre poucas ancoras: o caminho real fica, marcado como estimado
+            # (a regra dos 80% nao substitui a trajetoria, so marca).
+            estimado = parada(serie) > 0.8
+            for a_, b_ in zip(anc, anc[1:]):
+                if a_[3] not in ANCORAS or b_[3] not in ANCORAS:
+                    continue  # trecho com ponto de sintese: ja respeita VMAX_CHAVE pela poda
+                dt_ = b_[0] - a_[0]
+                v_ = math.hypot(b_[1] - a_[1], b_[2] - a_[2]) / dt_ if dt_ > 1e-6 else float("inf")
+                if v_ > VMAX_JOG + 1e-9:
+                    reg = {"pid": pid, "t_ini": round(a_[0] - t0, 2), "t_fim": round(b_[0] - t0, 2), "v": round(v_, 2)}
+                    (ancoras_conflito if v_ > VMAX_ANCORA else ancoras_vel).append(reg)
+        elif not estimado:
             serie, nc, corr = finalizar(caminho_real(anc, eh_chutador), pid)
             if parada(serie) > 0.8:  # decidido na trajetoria final (apos prender ao campo e limitar velocidade)
                 estimado = True
-        if estimado:
+        if estimado and not tem_ancora:
             n_est += 1
             if eh_chutador:
                 desl = (bola_em(t_b)[0] - bola_em(t0)[0], bola_em(t_b)[1] - bola_em(t0)[1])
@@ -823,7 +949,30 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
     if v_bola_max > 45:
         avisos.append(f"velocidade da bola {v_bola_max:.1f} m/s")
 
+    # colagem: quem tem a bola fica atras dela (posse.py); so jogadores que estao na lista
+    ids = {j["id"] for j in jogadores}
+    segs = [s for s in segmentos_posse(wev, t0, frames) if s[0] in ids]
+    lim = {j["id"]: (GOLEIRO_LIM_X if j["goleiro"] else CAMPO_LIM_X, CAMPO_LIM_Y) for j in jogadores}
+    novas, rel_posse = posse.colar(FPS, bola, {j["id"]: j["pos"] for j in jogadores}, segs,
+                                   vmax=VMAX_LIMITE, lim=lim)
+    for j in jogadores:
+        j["pos"] = [[round(x, 3), round(y, 3)] for x, y in novas[j["id"]]]
+    if rel_posse["vel_jogador"]:
+        avisos.append(f"posse: {len(rel_posse['vel_jogador'])} quadros do jogador acima de 10,5 m/s (registrado)")
+    if rel_posse["cortados_bola_rapida"]:
+        avisos.append(f"posse: {rel_posse['cortados_bola_rapida']} quadros com bola acima de 10,3 m/s saem da posse (bola em voo)")
+    if rel_posse["fora_do_alcance"]:
+        avisos.append(f"posse: {rel_posse['fora_do_alcance']} quadros fora da posse (jogador ainda longe da bola)")
+    if rel_posse["conflitos"]:
+        avisos.append(f"posse: {rel_posse['conflitos']} quadros com dois donos (ficou o primeiro)")
+    if ancoras_vel:
+        avisos.append(f"ancoras: {len(ancoras_vel)} trechos entre eventos acima de 10,5 m/s (ate 11,5, registrado)")
+    if ancoras_conflito:
+        avisos.append(f"ancoras: {len(ancoras_conflito)} trechos acima de 11,5 m/s (conflito do dado)")
+
     return {
+        "posse_runs": rel_posse["runs"], "posse_rel": rel_posse,
+        "ancoras": {"vel": ancoras_vel, "conflito": ancoras_conflito},
         "frames": frames, "frameChute": n_pre, "bola": bola, "jogadores": jogadores,
         "finalizadorId": str(gol["player"]["id"]), "time_gol": nome_time[gol_team], "time_outro": nome_time[outro_id],
         "time_gol_id": gol_team, "avisos": avisos, "t_c": t_c, "t0": t0, "n_est": n_est,
@@ -967,6 +1116,9 @@ def main():
     proxima_reserva = 0
     saida = []
     relatorio = []
+    posse_lances = {}
+    posse_t0 = {}
+    ancoras_lances = {}
     limitados_total = 0
     for ordem, spec in enumerate(ITENS, start=1):
         ok, motivo = tentar_completo(spec, ordem)
@@ -987,6 +1139,9 @@ def main():
                 continue
         lance, r = ok
         saida.append(lance)
+        posse_lances[lance["id"]] = [list(s) for s in r["posse_runs"]]
+        posse_t0[lance["id"]] = round(r["t0"], 4)
+        ancoras_lances[lance["id"]] = r["ancoras"]
         limitados_total += r["limitados_campo"]
         gol_min = lance["partida"]["minuto"]
         print(f"{ordem:>2} {usado['titulo']}: match {lance['partida']['matchId']}, {gol_min}, "
@@ -1009,6 +1164,12 @@ def main():
         json.dump({"lances": saida}, f, separators=(",", ":"), ensure_ascii=False)
     tmp.replace(SAIDA)
     print(f"gravado {SAIDA} com {len(saida)} lances")
+    POSSE_SAIDA.parent.mkdir(parents=True, exist_ok=True)
+    with open(POSSE_SAIDA, "w", encoding="utf-8") as f:
+        json.dump({"fps": FPS, "lances": posse_lances, "t0": posse_t0, "ancoras": ancoras_lances},
+                  f, ensure_ascii=False, indent=1)
+        f.write("\n")
+    print(f"posse gravada em {POSSE_SAIDA}")
     print(f"pontos de jogadores presos ao campo (+3 m): {limitados_total}")
     for linha in relatorio:
         print("  relatorio:", linha)

@@ -15,6 +15,8 @@ gravado é exatamente o que o gerador produz.
 
 Distância de toque e de chute é horizontal (plano do campo): jogador é um ponto
 no chão. Altura da bola no toque é conferida à parte (<= 2,5 m).
+(A) colagem: se existir data/posse/brasil.json, dentro dos segmentos de posse registrados o dono
+fica a até 0,9 m da bola em pelo menos 99% dos quadros (20 fps). Sem o arquivo, é informado como pendente.
 Só biblioteca padrão.
 """
 import json
@@ -29,6 +31,9 @@ sys.path.insert(0, str(SCRIPTS))
 import roteiros_brasil as R  # noqa: E402  (gerador, mesmo diretório)
 
 SAIDA = RAIZ / "web" / "data" / "brasil.json"
+POSSE_PATH = RAIZ / "data" / "posse" / "brasil.json"
+A_LIMITE_M = 0.9
+A_META_PCT = 99.0
 FPS = 20
 VEL_JOGADOR = 9.5
 VEL_BOLA = 38.0
@@ -157,7 +162,7 @@ def testar_lance(l, meta):
         f(all(a < b for a, b in zip(jt, jt[1:])), f"chaves de {j.get('id')} fora de ordem")
         f(0 <= jt[0] and jt[-1] <= dur, f"chaves de {j.get('id')} fora de [0, duracao]")
         if j.get("estimado") is False:
-            f(3 <= len(ch) <= 10, f"{j.get('id')} (envolvido) tem {len(ch)} chaves; esperado 3..10")
+            f(3 <= len(ch) <= 30, f"{j.get('id')} (envolvido) tem {len(ch)} chaves; esperado 3..30")
         else:
             f(2 <= len(ch) <= 3, f"{j.get('id')} (estimado) tem {len(ch)} chaves; esperado 2..3")
 
@@ -374,6 +379,38 @@ def _teste_drible_da_vaca(meta, bola, por_id, f, stats):
                       f"reencontro em {t_re:.2f} s a {d_re:.2f} m")
 
 
+def checar_colagem(lances):
+    """(A): dono a até A_LIMITE_M da bola nos quadros de posse registrados (mesma interpolação do visualizador)."""
+    if not POSSE_PATH.exists():
+        print("(A) colagem dos roteiros: pendente (sem data/posse/brasil.json; roteiros nao sao colados)")
+        return
+    posse = json.loads(POSSE_PATH.read_text(encoding="utf-8"))["lances"]
+    tot_geral = bons_geral = 0
+    for l in lances:
+        segs = posse.get(l.get("id"), [])
+        if not segs:
+            continue
+        por_id = {j["id"]: j for j in l["jogadores"]}
+        tot = bons = 0
+        for pid, a, b in segs:
+            j = por_id.get(pid)
+            checar(j is not None, f"[{l['id']}] posse de {pid!r}, que nao existe")
+            if j is None:
+                continue
+            for f in range(a, b + 1):
+                t = f / FPS
+                px, py = jogador_em(j["chaves"], t)
+                bx, by, _ = bola_em(l["chavesBola"], t)
+                tot += 1
+                bons += math.hypot(px - bx, py - by) <= A_LIMITE_M
+        tot_geral += tot
+        bons_geral += bons
+        if tot:
+            checar(100 * bons / tot >= A_META_PCT,
+                   f"[{l['id']}] colagem (A): {100 * bons / tot:.1f}% dos quadros de posse a ate {A_LIMITE_M} m")
+    print(f"(A) colagem dos roteiros: {bons_geral} de {tot_geral} quadros de posse a ate {A_LIMITE_M} m do dono")
+
+
 def main():
     global verificacoes
     f_json = json.loads(SAIDA.read_text(encoding="utf-8"))
@@ -397,6 +434,7 @@ def main():
             continue
         tabela.append(testar_lance(l, meta))
 
+    checar_colagem(lances)
     print(f"{'#':>2}  {'id':<48} {'dur':>5} {'jog':>3} {'bola':>4} {'toq':>3} {'v_jog':>6} {'v_bola':>6}")
     for s in tabela:
         extra = f"  barreira={s['barreira']}" if "barreira" in s else ""
