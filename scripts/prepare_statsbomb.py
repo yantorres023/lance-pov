@@ -52,6 +52,7 @@ MOV_SINTETICO_ANTES = 4.0  # s antes do primeiro ponto real em que o movimento e
 TAU = 0.5  # s, desaceleracao depois do ultimo ponto real
 VMAX_CHAVE = 9.0  # m/s: pontos reais consecutivos mais rapidos que isso sao descartados (dados inconsistentes)
 VMAX_LIMITE = 10.3  # m/s: alvo do limitador (margem para o arredondamento a 3 casas)
+D_CORRIDA = 7.0  # m: percurso da corrida ate o ponto do chute (chutador com poucos pontos reais)
 CAMPO_LIM_X = 55.5  # m: jogadores ficam ate 3 m fora das linhas de fundo
 CAMPO_LIM_Y = 37.0  # m: e 3 m fora das laterais
 GOLEIRO_LIM_X = 54.5  # m: goleiro pode ir ate a rede (dentro do gol)
@@ -88,8 +89,8 @@ ITENS = [
          contexto="Segundo gol de Ronaldinho no Bernabéu, aos 77', fecha o 3 × 0 do Barcelona sobre o Real Madrid em novembro de 2005."),
     dict(titulo="Messi — 92' no Bernabéu", comp=(11, 2), times=("Real Madrid", "Barcelona"), autor="Messi", minuto=91, time="Barcelona", data="2017-04",
          contexto="Messi marca aos 92' e fecha a virada do Barcelona no Bernabéu: Real Madrid 2 × 3 Barcelona, em abril de 2017."),
-    dict(titulo="Suárez — rebote do pênalti de Messi", comp=(11, 27), times=("Barcelona", "Celta Vigo"), autor="Suárez", minuto=81, time="Barcelona", data="2016-02",
-         contexto="Messi perde um pênalti aos 80'; Suárez completa aos 81' e amplia para 4 × 1 do Barcelona sobre o Celta, em fevereiro de 2016."),
+    dict(titulo="Pênalti em dois toques — Messi rola, Suárez marca", comp=(11, 27), times=("Barcelona", "Celta Vigo"), autor="Suárez", minuto=81, time="Barcelona", data="2016-02",
+         contexto="Messi cobra o pênalti aos 80'; logo depois Suárez marca, aos 81', e o Barcelona vai a 4 × 1 sobre o Celta, em fevereiro de 2016."),
     dict(titulo="Henry — contra o Liverpool", comp=(2, 44), times=("Arsenal", "Liverpool"), autor="Henry", n=2, time="Arsenal", data="2004-04",
          contexto="Segundo gol de Henry na vitória do Arsenal por 4 × 2 sobre o Liverpool, em abril de 2004; aos 49' ele faz o 3 × 2."),
     dict(titulo="Vardy — voleio", comp=(2, 27), times=("Leicester City", "Liverpool"), autor="Vardy", minuto=59, n=1, time="Leicester City", data="2016-02",
@@ -122,7 +123,7 @@ ITENS = [
     dict(titulo="Lamine Yamal — Euro 2024", comp=(55, 282), times=("Spain", "France"), autor="Lamine Yamal", minuto=20, time="Spain",
          contexto="Lamine Yamal empata aos 20' (1 × 1) na semifinal contra a França; a Espanha vence por 2 × 1."),
     dict(titulo="Bellingham — bicicleta", comp=(55, 282), times=("England", "Slovakia"), autor="Bellingham", minuto=94, time="England",
-         contexto="Bellingham, de bicicleta aos 94', faz o 2 × 1 da Inglaterra sobre a Eslováquia nas oitavas da Eurocopa de 2024."),
+         contexto="Bellingham, de bicicleta aos 94', empata em 1 × 1 contra a Eslováquia nas oitavas da Eurocopa de 2024; Kane faz o 2 × 1 na prorrogação."),
 ]
 
 # Origi (30) nao e StatsBomb: copiado de web/data/lances.json.
@@ -262,19 +263,38 @@ def obter(rel):
 
 
 def tempo(ev):
-    """Segundos no relogio da partida (minuto x 60 + segundos com fracao do timestamp)."""
-    return float(ev["minute"]) * 60.0 + float(ev["timestamp"].split(":")[2])
+    """Segundos no relogio do periodo (timestamp HH:MM:SS.mmm). Compare so eventos do mesmo periodo."""
+    h, m, sg = ev["timestamp"].split(":")
+    return int(h) * 3600.0 + int(m) * 60.0 + float(sg)
+
+
+def z_contato(e):
+    """Altura (m) da bola no inicio do chute, conforme o tipo de contato."""
+    sh = e["shot"]
+    corpo = (sh.get("body_part") or {}).get("name")
+    tecnica = (sh.get("technique") or {}).get("name")
+    if tecnica == "Lob":
+        return 0.0
+    if corpo == "Head":
+        return 1.9
+    if tecnica == "Overhead Kick":
+        return 1.4
+    if tecnica == "Volley":
+        return 1.0
+    return 0.0
 
 
 def cadeia_bola(eventos, gol, gol_team, desde):
     """Keyframes da bola ate o chute do gol. Devolve (keyframes, t_b, fim_gol).
 
-    t_b e o inicio do chute da bola (pode ser um pouco depois do evento, se a cadeia anterior
-    ainda estava em curso). fim_gol = (t, x, y, z) do ponto em que a bola chega ao gol.
+    eventos: so do periodo do chute. t_b e o inicio do chute da bola (pode ser um pouco depois
+    do evento, se a cadeia anterior ainda estava em curso). fim_gol = (t, x, y, z) do ponto em
+    que a bola chega ao gol. Velocidade 3D limitada a VMAX_BOLA_SEG nos segmentos e conexoes.
     """
     bk = []
     cur_t = None
     cur_p = None
+    cur_z = 0.0
     t_b = None
     fim = None
     for e in sorted(eventos, key=lambda ev: ev["index"]):
@@ -289,6 +309,7 @@ def cadeia_bola(eventos, gol, gol_team, desde):
         alvo = e is gol
         esp = e["team"]["id"] != gol_team
         altura = None
+        tecnica = None
         if typ == "Pass":
             fimloc = e["pass"].get("end_location") or loc
             altura = (e["pass"].get("height") or {}).get("name")
@@ -296,12 +317,14 @@ def cadeia_bola(eventos, gol, gol_team, desde):
             fimloc = e["carry"].get("end_location") or loc
         else:
             fimloc = e["shot"].get("end_location") or loc
+            tecnica = (e["shot"].get("technique") or {}).get("name")
         p0 = campo_m(loc[0], loc[1], esp)
         p1 = campo_m(fimloc[0], fimloc[1], esp)
         if alvo:
             p1 = (max(p1[0], LINHA_GOL), p1[1])  # bola na linha de gol (gol confirmado pelo StatsBomb)
         d = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
         dur = float(e.get("duration") or 0.0)
+        z0 = z_contato(e) if typ == "Shot" else 0.0
         z1 = 0.0
         zpico = 0.0
         if typ == "Shot":
@@ -309,24 +332,28 @@ def cadeia_bola(eventos, gol, gol_team, desde):
                 dur = d / 25.0
             if len(fimloc) > 2:
                 z1 = fimloc[2] * YARD
+            if tecnica == "Lob":
+                zpico = min(0.25 * d, 6.0)
         elif typ == "Pass":
             zpico = {"Low Pass": 1.0, "High Pass": min(0.22 * d, 14.0)}.get(altura, 0.0)
         if cur_p is not None:
             dc = math.hypot(p0[0] - cur_p[0], p0[1] - cur_p[1])
-            dtc = max(dc / VMAX_BOLA_SEG, 0.02)
-            bk.append((cur_t + dtc, p0[0], p0[1], 0.0))
+            dz = z0 - cur_z
+            dtc = max(math.sqrt(dc * dc + dz * dz) / VMAX_BOLA_SEG, 0.02)
+            bk.append((cur_t + dtc, p0[0], p0[1], z0))
             ini = max(tempo(e), cur_t + dtc)
         else:
             ini = tempo(e)
         if alvo:
             t_b = ini
-        bk.append((ini, p0[0], p0[1], 0.0))
-        dt = max(dur, d / VMAX_BOLA_SEG, 0.02)
-        for s in (0.25, 0.5, 0.75):
-            bk.append((ini + dt * s, p0[0] + (p1[0] - p0[0]) * s, p0[1] + (p1[1] - p0[1]) * s,
-                       z1 * s + zpico * 4 * s * (1 - s)))
+        bk.append((ini, p0[0], p0[1], z0))
+        dz_seg = z1 - z0
+        dt = max(dur, math.sqrt(d * d + dz_seg * dz_seg) / VMAX_BOLA_SEG, 0.02)
+        for s_ in (0.25, 0.5, 0.75):
+            bk.append((ini + dt * s_, p0[0] + (p1[0] - p0[0]) * s_, p0[1] + (p1[1] - p0[1]) * s_,
+                       z0 * (1 - s_) + z1 * s_ + zpico * 4 * s_ * (1 - s_)))
         bk.append((ini + dt, p1[0], p1[1], z1))
-        cur_t, cur_p = ini + dt, p1
+        cur_t, cur_p, cur_z = ini + dt, p1, z1
         if alvo:
             fim = (ini + dt, p1[0], p1[1], z1)
             break
@@ -396,6 +423,64 @@ def podar_chaves(ks, t_ref):
     return list(reversed(antes)) + [ks[ref]] + depois
 
 
+def caminho_real(anc, eh_chutador):
+    """Trajetoria pelos pontos reais retidos: interpolacao linear entre eles, constante antes do
+    primeiro e desaceleracao ate parar depois do ultimo. O chutador nao sai do ponto do chute."""
+    ts = [c[0] for c in anc]
+    ps = [(c[1], c[2]) for c in anc]
+    t_ult = ts[-1]
+    x_ult, y_ult = ps[-1]
+    vx = vy = 0.0
+    if len(anc) >= 2 and not eh_chutador:
+        dtv = ts[-1] - ts[-2]
+        vx = (ps[-1][0] - ps[-2][0]) / dtv
+        vy = (ps[-1][1] - ps[-2][1]) / dtv
+        v = math.hypot(vx, vy)
+        if v > VMAX_JOG:
+            vx, vy = vx * VMAX_JOG / v, vy * VMAX_JOG / v
+
+    def pos(t):
+        if t <= t_ult:
+            return interp_lin(ts, ps, t)
+        f = TAU * (1 - math.exp(-(t - t_ult) / TAU))
+        return (x_ult + vx * f, y_ult + vy * f)
+    return pos
+
+
+def caminho_chutador(anc, t_c, t0, deslocamento_bola, ataca_para_mais):
+    """Posicao do chutador quando ele tem poucos pontos reais: corrida suave que chega
+    exatamente ao ponto do chute (t_c) e para la. Devolve pos(t)."""
+    ref = next(c for c in anc if abs(c[0] - t_c) < 1e-3)
+    pc = (ref[1], ref[2])
+    inicio = None
+    antes = [c for c in anc if c[0] < t_c - 1e-3]
+    if antes:
+        a = antes[-1]  # ponto real anterior, se a corrida ate ele for plausivel
+        dist = math.hypot(pc[0] - a[1], pc[1] - a[2])
+        dt = t_c - a[0]
+        if dt >= 1.5 and 3.0 <= dist and dist / dt <= 5.0:
+            inicio = (a[0], (a[1], a[2]))
+    if inicio is None:
+        nb = math.hypot(deslocamento_bola[0], deslocamento_bola[1])
+        if nb >= 2.0:
+            u = (deslocamento_bola[0] / nb, deslocamento_bola[1] / nb)
+        else:
+            u = (1.0, 0.0) if ataca_para_mais else (-1.0, 0.0)
+        t_s = t_c - min(3.0, t_c - t0)
+        inicio = (t_s, (pc[0] - u[0] * D_CORRIDA, pc[1] - u[1] * D_CORRIDA))
+    t_s, p_s = inicio
+
+    def pos(t):
+        if t <= t_s:
+            return p_s
+        if t >= t_c:
+            return pc
+        tau = (t - t_s) / (t_c - t_s)
+        f = 3 * tau * tau - 2 * tau ** 3  # suavizacao (sem solavanco no inicio e no fim)
+        return (p_s[0] + (pc[0] - p_s[0]) * f, p_s[1] + (pc[1] - p_s[1]) * f)
+    return pos
+
+
 def limitar_campo(seq, lim_x, lim_y):
     """Prende cada ponto em |x| <= lim_x e |y| <= lim_y. Devolve (lista, pontos alterados)."""
     out = []
@@ -461,7 +546,7 @@ def achar_gol(eventos, spec):
         if spec.get("tecnica") and e["shot"]["technique"]["name"] != spec["tecnica"]:
             continue
         cands.append(e)
-    cands.sort(key=tempo)
+    cands.sort(key=lambda e: (e["period"], tempo(e)))
     if spec.get("n"):
         return (cands[spec["n"] - 1] if len(cands) >= spec["n"] else None), len(cands)
     if len(cands) == 1:
@@ -511,14 +596,16 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
             info[pid] = (nome, p.get("jersey_number"), m["team_id"])
 
     t_c = tempo(gol)
-    inicio_posse = min(tempo(e) for e in eventos if e["possession"] == gol["possession"] and e["index"] <= gol["index"])
+    periodo = gol["period"]
+    evs = [e for e in eventos if e["period"] == periodo]  # so eventos do periodo do chute
+    inicio_posse = min(tempo(e) for e in evs if e["possession"] == gol["possession"] and e["index"] <= gol["index"])
     W = spec.get("janela", JANELA_PADRAO)
 
     # ---------------- bola: cadeia de segmentos com tempo para frente ----------------
     # Cada passe/conducao/chute e um segmento. Se o segmento seguinte comeca antes do anterior
     # terminar, ele espera; se os pontos estao distantes, uma conexao anda no limite VMAX_BOLA_SEG.
     # Assim a bola nunca tem velocidade acima do limite. O chute pode atrasar um pouco (t_b).
-    bk, t_b, fim_gol = cadeia_bola(eventos, gol, gol_team, t_c - W - 15.0)
+    bk, t_b, fim_gol = cadeia_bola(evs, gol, gol_team, t_c - W - 15.0)
     t_gol_fim, gx, gy, gz = fim_gol
 
     # ---------------- janela (quadros), alinhada ao inicio do chute da bola ----------------
@@ -532,7 +619,7 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
     frames = n_pre + n_pos + 1
     t_fim = t_b + n_pos / FPS
 
-    wev = [e for e in eventos if t0 - 3.0 <= tempo(e) <= t_fim + 1.0]
+    wev = [e for e in evs if t0 - 3.0 <= tempo(e) <= t_fim + 1.0]
     eventos_janela = sum(1 for e in wev if t0 <= tempo(e) <= t_fim)
 
     # Bola entra no gol: ponto alem da linha e queda ate o chao, depois parada na rede.
@@ -586,6 +673,7 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
                 adicionar(qid, te, campo_m(p["location"][0], p["location"][1], esp), team_q, "ff")
 
     usou360 = False
+    usados360 = []  # ids dos eventos cujo quadro 360 foi associado
     tem_360 = t360 is not None
     if tem_360:
         # 360 do proprio chute nao entra: o freeze frame do chute ja trouxe os nomes.
@@ -610,33 +698,41 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
                 if p.get("actor") or not p.get("location"):
                     continue
                 team_p = ator_team if p.get("teammate") else outro_ator
-                pts.append((campo_m(p["location"][0], p["location"][1], esp), team_p))
+                pts.append((campo_m(p["location"][0], p["location"][1], esp), team_p, bool(p.get("keeper"))))
+            usou_quadro = False
             for team in (ator_team, outro_ator):
-                pts_t = [q for q, tm in pts if tm == team]
-                if not pts_t:
-                    continue
-                estado = {}
-                for pid, ks in chaves.items():
-                    if time_de.get(pid) != team or pid == ator_pid or not ks:
+                for eh_goleiro in (False, True):
+                    # goleiro so casa com goleiro (flag keeper do 360 e lineup); linha so com linha
+                    pts_t = [q for q, tm, kp in pts if tm == team and kp == eh_goleiro]
+                    if not pts_t:
                         continue
-                    k = min(ks, key=lambda c: abs(c[0] - te))
-                    estado[pid] = (abs(k[0] - te), k[1], k[2])
-                pares = []
-                for pid, (dt, x, y) in estado.items():
-                    gate = max(3.0, 8.5 * dt)
-                    for j, q in enumerate(pts_t):
-                        d = math.hypot(q[0] - x, q[1] - y)
-                        if d <= gate:
-                            pares.append((d, pid, j))
-                pares.sort()
-                usados_p, usados_j = set(), set()
-                for d, pid, j in pares:
-                    if pid in usados_p or j in usados_j:
-                        continue
-                    usados_p.add(pid)
-                    usados_j.add(j)
-                    adicionar(pid, te, pts_t[j], team, "360")
-                    usou360 = True
+                    estado = {}
+                    for pid, ks in chaves.items():
+                        if time_de.get(pid) != team or pid == ator_pid or not ks:
+                            continue
+                        if (pid in goleiros) != eh_goleiro:
+                            continue
+                        k = min(ks, key=lambda c: abs(c[0] - te))
+                        estado[pid] = (abs(k[0] - te), k[1], k[2])
+                    pares = []
+                    for pid, (dt, x, y) in estado.items():
+                        gate = max(3.0, 8.5 * dt)
+                        for j, q in enumerate(pts_t):
+                            d = math.hypot(q[0] - x, q[1] - y)
+                            if d <= gate:
+                                pares.append((d, pid, j))
+                    pares.sort()
+                    usados_p, usados_j = set(), set()
+                    for d, pid, j in pares:
+                        if pid in usados_p or j in usados_j:
+                            continue
+                        usados_p.add(pid)
+                        usados_j.add(j)
+                        adicionar(pid, te, pts_t[j], team, "360")
+                        usou360 = True
+                        usou_quadro = True
+            if usou_quadro:
+                usados360.append(e["id"])
 
     # ---------------- jogadores: trajetorias ----------------
     pids = [pid for pid, ks in chaves.items() if any(t0 - 3.0 <= c[0] <= t_fim for c in ks)]
@@ -646,50 +742,55 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
     total_corr = 0
     total_campo = 0
     n_est = 0
+    def parada(serie):
+        """Fracao dos passos entre quadros consecutivos em que o jogador praticamente nao se mexe."""
+        arred = [(round(x, 3), round(y, 3)) for x, y in serie]  # mesma base do JSON (3 casas)
+        passos = [math.dist(arred[i], arred[i - 1]) for i in range(1, len(arred))]
+        return sum(1 for d in passos if d < 0.01) / len(passos)
+
+    def finalizar(pos_fn, pid):
+        """Amostra a 20 fps, prende ao campo (antes do limitador) e limita a velocidade."""
+        serie_ = [pos_fn(t0 + i / FPS) for i in range(frames)]
+        lim_x = GOLEIRO_LIM_X if pid in goleiros else CAMPO_LIM_X
+        serie_, nc_ = limitar_campo(serie_, lim_x, CAMPO_LIM_Y)
+        serie_, corr_ = limitar_velocidade(serie_, VMAX_LIMITE)
+        return serie_, nc_, corr_
+
+    def caminho_sintetico(anc):
+        """Movimento estimado: passa pelos pontos retidos e copia um pouco do movimento da bola
+        perto deles (fora de MOV_SINTETICO_ANTES/JANELA_DEPOIS o jogador fica parado)."""
+        ts = [c[0] for c in anc]
+        ps = [(c[1], c[2]) for c in anc]
+        bs = [tuple(bola_em(c[0])[:2]) for c in anc]
+        lo, hi = ts[0] - MOV_SINTETICO_ANTES, ts[-1] + JANELA_DEPOIS
+
+        def pos(t):
+            P = interp_lin(ts, ps, t)
+            Bb = interp_lin(ts, bs, t)
+            Bt = bola_em(min(max(t, lo), hi))
+            return (P[0] + K_OFF[0] * (Bt[0] - Bb[0]), P[1] + K_OFF[1] * (Bt[1] - Bb[1]))
+        return pos
+
     for pid in pids:
         ks = chaves[pid]
-        extras = [c for c in ks if abs(c[0] - t_c) > 1e-3]
+        anc = podar_chaves(ks, t_c)  # pontos efetivamente retidos
+        extras = [c for c in anc if abs(c[0] - t_c) > 1e-3]
+        eh_chutador = pid == str(gol["player"]["id"])
         estimado = len(extras) <= 1
-        anc = podar_chaves(ks, t_c)
-        if estimado and pid != str(gol["player"]["id"]):  # o chutador fica no ponto do chute
-            ts = [c[0] for c in anc]
-            ps = [(c[1], c[2]) for c in anc]
-            bs = [tuple(bola_em(c[0])[:2]) for c in anc]
-            lo, hi = ts[0] - MOV_SINTETICO_ANTES, ts[-1] + JANELA_DEPOIS
-
-            def pos_fn(t, ts=ts, ps=ps, bs=bs, lo=lo, hi=hi):
-                # o movimento copiado da bola so vale perto do ponto real (fora disso o jogador fica parado)
-                P = interp_lin(ts, ps, t)
-                Bb = interp_lin(ts, bs, t)
-                Bt = bola_em(min(max(t, lo), hi))
-                return (P[0] + K_OFF[0] * (Bt[0] - Bb[0]), P[1] + K_OFF[1] * (Bt[1] - Bb[1]))
+        serie, nc, corr = None, 0, 0
+        if not estimado:
+            serie, nc, corr = finalizar(caminho_real(anc, eh_chutador), pid)
+            if parada(serie) > 0.8:  # decidido na trajetoria final (apos prender ao campo e limitar velocidade)
+                estimado = True
+        if estimado:
             n_est += 1
-        else:
-            pts = [(c[0], c[1], c[2]) for c in anc]
-            prep = ([c[0] for c in pts], [(c[1], c[2]) for c in pts])
-            t_ult = pts[-1][0]
-            x_ult, y_ult = pts[-1][1], pts[-1][2]
-            if len(pts) >= 2 and pid != str(gol["player"]["id"]):
-                dtv = pts[-1][0] - pts[-2][0]
-                vx = (pts[-1][1] - pts[-2][1]) / dtv
-                vy = (pts[-1][2] - pts[-2][2]) / dtv
-                v = math.hypot(vx, vy)
-                if v > VMAX_JOG:
-                    vx, vy = vx * VMAX_JOG / v, vy * VMAX_JOG / v
+            if eh_chutador:
+                desl = (bola_em(t_b)[0] - bola_em(t0)[0], bola_em(t_b)[1] - bola_em(t0)[1])
+                pos_fn = caminho_chutador(anc, t_c, t0, desl, time_de[pid] == gol_team)
             else:
-                vx = vy = 0.0
-
-            def pos_fn(t, prep=prep, t_ult=t_ult, x_ult=x_ult, y_ult=y_ult, vx=vx, vy=vy):
-                if t <= t_ult:
-                    return interp_lin(prep[0], prep[1], t)
-                dt = t - t_ult
-                f = TAU * (1 - math.exp(-dt / TAU))
-                return (x_ult + vx * f, y_ult + vy * f)
-        serie = [pos_fn(t0 + i / FPS) for i in range(frames)]
-        lim_x = GOLEIRO_LIM_X if pid in goleiros else CAMPO_LIM_X
-        serie, nc = limitar_campo(serie, lim_x, CAMPO_LIM_Y)  # antes do limitador de velocidade
+                pos_fn = caminho_sintetico(anc)
+            serie, nc, corr = finalizar(pos_fn, pid)
         total_campo += nc
-        serie, corr = limitar_velocidade(serie, VMAX_LIMITE)
         total_corr += corr
         time_lado = "attack" if time_de[pid] == gol_team else "defense"
         nome, numero, _ = info.get(pid, (None, None, None))
@@ -702,6 +803,7 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
             "nome": nome,
             "pos": [[round(x, 3), round(y, 3)] for x, y in serie],
             "estimado": estimado,
+            "goleiro": pid in goleiros,
         })
     if total_corr:
         avisos.append(f"{total_corr} pontos corrigidos pelo limite de 10,5 m/s")
@@ -726,6 +828,9 @@ def reconstruir(spec, partida, eventos, lineups, t360, gol):
         "finalizadorId": str(gol["player"]["id"]), "time_gol": nome_time[gol_team], "time_outro": nome_time[outro_id],
         "time_gol_id": gol_team, "avisos": avisos, "t_c": t_c, "t0": t0, "n_est": n_est,
         "limitados_campo": total_campo,
+        "periodo": periodo, "chute_id": gol["id"], "eventos_ids": [e["id"] for e in wev],
+        "frames360_ids": usados360,
+        "bola_parada": gol["shot"]["type"]["name"] in ("Penalty", "Free Kick", "Corner", "Kick Off"),
         "eventos": eventos_janela, "tem360": tem_360 and usou360, "ff": bool(gol["shot"].get("freeze_frame")),
         "v_bola_max": v_bola_max, "mid": mid, "bk": bk,
     }
@@ -769,6 +874,9 @@ def montar_item(ordem, spec, partida, eventos, lineups, t360, gol):
         "times": {"attack": NOMES_PT.get(att, att), "defense": NOMES_PT.get(dfn, dfn)},
         "finalizadorId": r["finalizadorId"],
         "frameChute": r["frameChute"],
+        "bolaParada": r["bola_parada"],
+        "auditoria": {"periodo": r["periodo"], "chuteId": r["chute_id"],
+                      "eventos": r["eventos_ids"], "frames360": r["frames360_ids"]},
         "partida": {"matchId": r["mid"], "minuto": f"{gol['minute']}:{gol['second']:02d}"},
         "qualidade": {
             "freeze_frame": r["ff"],
@@ -825,6 +933,8 @@ def copiar_origi():
             nc_total += nc
             novo.append(p if nc == 0 else [round(q[0], 3), round(q[1], 3)])
         jogs.append({**j, "pos": novo})
+    for j in jogs:
+        j["estimado"] = False
     lance["jogadores"] = jogs
     lance["ordem"] = 30
     lance["grupo"] = "hypados"

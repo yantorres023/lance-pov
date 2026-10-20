@@ -274,7 +274,104 @@ def testar_lance(l, meta):
         f(4 <= len(barreira) <= 5, f"barreira com {len(barreira)} jogadores (esperado 4..5)")
         stats["barreira"] = len(barreira)
 
+    if lid.startswith("everton-ribeiro"):
+        _teste_chapeu_everton(meta, bola, por_id, f, stats)
+    if lid.startswith("neymar-santos"):
+        _teste_drible_da_vaca(meta, bola, por_id, f, stats)
+
     return stats
+
+
+def _teste_chapeu_everton(meta, bola, por_id, f, stats):
+    """Chapéu de Éverton: a bola passa POR CIMA do zagueiro (no pico, distância horizontal < 0,8 m e z >= 2,2 m),
+    Éverton termina do outro lado do zagueiro, contorna sem encostar e reencontra a bola para o voleio."""
+    E, D = por_id["everton"], por_id["zagueiro"]
+    t_fim = meta["t_chute"]
+    t_ch = max(t for t, p in meta["toques"] if p == "everton" and t < t_fim - 1e-9)
+    n = int(round((t_fim - t_ch) / 0.001))
+    grade = [t_ch + i * 0.001 for i in range(n + 1)]
+
+    def dist_bola_zagueiro(t):
+        bx, by, _ = bola_em(bola, t)
+        dx, dy = jogador_em(D["chaves"], t)
+        return math.hypot(bx - dx, by - dy)
+
+    t_pico = min(grade, key=dist_bola_zagueiro)
+    dh = dist_bola_zagueiro(t_pico)
+    bz = bola_em(bola, t_pico)[2]
+    f(dh < 0.8, f"chapéu: a bola não passa sobre o zagueiro (a {dh:.2f} m no pico, limite 0,8)")
+    f(bz >= 2.2, f"chapéu: a bola passa sobre o zagueiro a {bz:.2f} m de altura (mínimo 2,2)")
+
+    sinal = [jogador_em(E["chaves"], t)[0] - jogador_em(D["chaves"], t)[0] for t in grade]
+    f(sinal[0] < 0 < sinal[-1], "Éverton não termina do outro lado do zagueiro")
+    cruza = [i for i in range(1, len(grade)) if sinal[i - 1] < 0 <= sinal[i]]
+    folga = None
+    if cruza:
+        t_c = grade[cruza[0]]
+        folga = abs(jogador_em(E["chaves"], t_c)[1] - jogador_em(D["chaves"], t_c)[1])
+        f(folga >= 1.0, f"Éverton cruza o zagueiro colado nele (folga {folga:.2f} m, mínimo 1,0)")
+    else:
+        f(False, "Éverton não cruza a linha do zagueiro")
+    menor = min(math.dist(jogador_em(E["chaves"], t), jogador_em(D["chaves"], t)) for t in grade)
+    f(menor >= 0.8, f"Éverton encosta no zagueiro (a {menor:.2f} m)")
+    stats["extra"] = (f"chapéu: pico em {t_pico:.2f} s, bola-zagueiro {dh:.2f} m, z {bz:.2f} m; "
+                      f"Éverton contorna com folga {folga if folga is not None else float('nan'):.2f} m, "
+                      f"menor distância a Éverton {menor:.2f} m")
+
+
+def _teste_drible_da_vaca(meta, bola, por_id, f, stats):
+    """Drible da vaca: Neymar toca a bola por um lado do marcador e corre pelo outro, reencontrando a bola depois."""
+    N, A = por_id["neymar"], por_id["angelim"]
+    t_fim = meta["t_chute"]
+    toques_n = sorted(t for t, p in meta["toques"] if p == "neymar")
+    candidatos = [t for t in toques_n if 2.0 < t < t_fim - 1e-9]
+    if not candidatos:
+        f(False, "drible da vaca: sem toque de Neymar perto de Angelim")
+        return
+    t_dv = min(candidatos, key=lambda t: math.dist(jogador_em(N["chaves"], t), jogador_em(A["chaves"], t)))
+    depois = [t for t in toques_n if t > t_dv + 1e-9]
+    if not depois:
+        f(False, "drible da vaca: não há reencontro de Neymar com a bola depois do drible")
+        return
+    t_re = depois[0]
+    nx0, ny0 = jogador_em(N["chaves"], t_dv)
+    nx1, ny1 = jogador_em(N["chaves"], t_re)
+    comp = math.hypot(nx1 - nx0, ny1 - ny0)
+    dxm, dym = (nx1 - nx0) / comp, (ny1 - ny0) / comp   # direção do movimento de Neymar na volta
+
+    def cruz(vx, vy):  # produto vetorial d x v (sinal = lado do marcador em relação à direção)
+        return dxm * vy - dym * vx
+
+    grade = [t_dv + i * 0.001 for i in range(int(round((t_re - t_dv) / 0.001)) + 1)]
+    proj = []
+    for t in grade:
+        nx, ny = jogador_em(N["chaves"], t)
+        ax, ay = jogador_em(A["chaves"], t)
+        proj.append((nx - ax) * dxm + (ny - ay) * dym)
+    cruza = [i for i in range(1, len(grade)) if proj[i - 1] < 0 <= proj[i]]
+    if not cruza:
+        f(False, "drible da vaca: Neymar nunca passa por Angelim entre o toque e o reencontro")
+        return
+    t_x = grade[cruza[0]]
+    nx, ny = jogador_em(N["chaves"], t_x)
+    ax, ay = jogador_em(A["chaves"], t_x)
+    bx, by, _ = bola_em(bola, t_x)
+    lat_n = cruz(nx - ax, ny - ay)
+    lat_b = cruz(bx - ax, by - ay)
+    sep = math.hypot(bx - nx, by - ny)
+    f(lat_n * lat_b < 0, f"drible da vaca: bola e Neymar do mesmo lado de Angelim ({lat_b:+.2f} e {lat_n:+.2f} m)")
+    f(min(abs(lat_n), abs(lat_b)) >= 1.0,
+      f"drible da vaca: lateral curto demais ({lat_b:+.2f} e {lat_n:+.2f} m, mínimo 1,0)")
+    f(sep >= 2.0, f"drible da vaca: bola a {sep:.2f} m de Neymar no cruzamento (mínimo 2,0)")
+    menor_n = min(math.dist(jogador_em(N["chaves"], t), jogador_em(A["chaves"], t)) for t in grade)
+    menor_b = min(math.dist(bola_em(bola, t)[:2], jogador_em(A["chaves"], t)) for t in grade)
+    f(menor_n >= 1.0, f"drible da vaca: Neymar encosta em Angelim (a {menor_n:.2f} m)")
+    f(menor_b >= 1.0, f"drible da vaca: a bola encosta em Angelim (a {menor_b:.2f} m)")
+    d_re = math.dist(jogador_em(N["chaves"], t_re), bola_em(bola, t_re)[:2])
+    f(d_re <= TOQUE_M, f"drible da vaca: reencontro a {d_re:.2f} m da bola (limite {TOQUE_M})")
+    stats["extra"] = (f"drible da vaca: toque em {t_dv:.2f} s, cruzamento de Angelim em {t_x:.2f} s, "
+                      f"lados {lat_b:+.2f} m (bola) e {lat_n:+.2f} m (Neymar), separação {sep:.2f} m, "
+                      f"reencontro em {t_re:.2f} s a {d_re:.2f} m")
 
 
 def main():
@@ -305,6 +402,9 @@ def main():
         extra = f"  barreira={s['barreira']}" if "barreira" in s else ""
         print(f"{s['ordem']:>2}  {s['id']:<48} {s['dur']:>5} {s['jog']:>3} {s['bola']:>4} {s['toques']:>3} "
               f"{s['vmax_jog']:>6.2f} {s['vmax_bola']:>6.2f}{extra}")
+    for s in tabela:
+        if s.get("extra"):
+            print(f"  {s['id']}: {s['extra']}")
     print(f"verificações: {verificacoes}, falhas: {len(erros)}")
     for e in erros[:60]:
         print("FALHA", e)

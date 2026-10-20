@@ -1289,6 +1289,7 @@ $('#arquivo-importar').onchange = async (e) => {
   const i = estado.lances.findIndex((x) => x.id === l.id);
   if (i >= 0) {   // substitui um lance existente, mantendo grupo e ordem
     const antigo = estado.lances[i];
+    if (!estado.originais[antigo.id] && !antigo.preparado) estado.originais[antigo.id] = JSON.stringify(antigo);   // "descartar" volta ao público
     l.grupo = antigo.grupo; l.ordem = antigo.ordem;
     if (antigo === estado.lance) estado.lance = null;
     liberarBonecos(antigo);
@@ -1296,12 +1297,12 @@ $('#arquivo-importar').onchange = async (e) => {
   } else {
     l.grupo = 'meus'; delete l.ordem;
     estado.lances.push(l);
-    salvarMeus([...lerMeus(), l.id]);
   }
-  try { localStorage.setItem(`lancepov:rascunho:${l.id}`, JSON.stringify(l)); } catch { /* sem armazenamento */ }
+  let salvo = l.grupo !== 'meus' || salvarMeus([...lerMeus(), l.id]);
+  try { localStorage.setItem(`lancepov:rascunho:${l.id}`, JSON.stringify(l)); } catch { salvo = false; }
   preencherLances(); $('#sel-lance').value = estado.lances.indexOf(l);
   carregarLance(l, true);
-  $('#ed-status').textContent = 'Lance importado e salvo neste navegador.';
+  $('#ed-status').textContent = salvo ? 'Lance importado e salvo neste navegador.' : 'Lance importado só nesta sessão (o navegador não deixou salvar); exporte o JSON para não perder.';
 };
 $('#ed-descartar').onclick = () => {
   const l = estado.lance, i = estado.lances.indexOf(l);
@@ -1312,6 +1313,7 @@ $('#ed-descartar').onclick = () => {
     estado.lances.splice(i, 1); estado.lance = null; liberarBonecos(l);
     preencherLances();
     const prox = estado.lances.find((x) => x.grupo === 'hypados') || estado.lances[0];
+    if (!prox) { alternarEditor(false); $('#carregando').textContent = 'Nenhum lance disponível. Recarregue a página.'; $('#carregando').hidden = false; return; }
     $('#sel-lance').value = estado.lances.indexOf(prox); carregarLance(prox);
     return;
   }
@@ -1337,7 +1339,7 @@ function lerMeus() {
   try { const v = JSON.parse(localStorage.getItem('lancepov:meus') || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; }
   catch { return []; }
 }
-function salvarMeus(ids) { try { localStorage.setItem('lancepov:meus', JSON.stringify([...new Set(ids)])); } catch { /* sem armazenamento */ } }
+function salvarMeus(ids) { try { localStorage.setItem('lancepov:meus', JSON.stringify([...new Set(ids)])); return true; } catch { return false; } }
 
 // Valida um roteiro vindo de arquivo ou do localStorage e devolve uma cópia só com campos conhecidos.
 function validarRoteiro(d) {
@@ -1346,6 +1348,9 @@ function validarRoteiro(d) {
   const chaveOk = (k, n) => Array.isArray(k) && k.length === n && k.every(num) && k[0] >= 0 && k[0] <= 120
     && Math.abs(k[1]) <= 80 && Math.abs(k[2]) <= 60 && (n < 4 || (k[3] >= 0 && k[3] <= 40));
   const lista = (v, n, max) => Array.isArray(v) && v.length >= 1 && v.length <= max && v.every((k) => chaveOk(k, n));
+  // cópia ordenada por tempo; chaves no mesmo instante viram uma só (vale a última)
+  const ordenar = (ks) => ks.map((k) => k.slice()).sort((a, b) => a[0] - b[0])
+    .reduce((acc, k) => { if (acc.length && Math.abs(acc[acc.length - 1][0] - k[0]) < 1e-6) acc[acc.length - 1] = k; else acc.push(k); return acc; }, []);
   if (!d || typeof d !== 'object' || d.roteiro !== true) throw new Error('não é um roteiro do Lance POV');
   if (typeof d.id !== 'string' || !/^[\w-]{1,80}$/.test(d.id)) throw new Error('id inválido');
   if (!num(d.duracao) || d.duracao < 1 || d.duracao > 120) throw new Error('duração inválida');
@@ -1362,7 +1367,7 @@ function validarRoteiro(d) {
     if (!texto(j.nome, 60) || !texto(j.cor, 30) || !texto(j.borda, 30)) throw new Error(`textos do jogador ${n + 1} inválidos`);
     if (j.numero != null && !(Number.isInteger(j.numero) && j.numero >= 0 && j.numero <= 999)) throw new Error(`número do jogador ${n + 1} inválido`);
     if (!lista(j.chaves, 3, 5000)) throw new Error(`chaves do jogador ${n + 1} inválidas`);
-    return { id, time: j.time, numero: j.numero ?? null, nome: j.nome ?? null, cor: j.cor ?? null, borda: j.borda ?? null, chaves: j.chaves.map((k) => k.slice()), estimado: !!j.estimado };
+    return { id, time: j.time, numero: j.numero ?? null, nome: j.nome ?? null, cor: j.cor ?? null, borda: j.borda ?? null, chaves: ordenar(j.chaves), estimado: !!j.estimado };
   });
   const times = d.times && typeof d.times === 'object' && texto(d.times.attack, 60) && texto(d.times.defense, 60)
     ? { attack: d.times.attack, defense: d.times.defense } : undefined;
@@ -1370,7 +1375,7 @@ function validarRoteiro(d) {
   return {
     id: d.id, titulo: d.titulo || d.id, subtitulo: d.subtitulo, contexto: d.contexto, fonte: d.fonte, times, finalizadorId: fin,
     grupo: ['hypados', 'brasil', 'meus', 'extras'].includes(d.grupo) ? d.grupo : 'meus', ordem: Number.isInteger(d.ordem) ? d.ordem : undefined,
-    roteiro: true, aproximado: true, duracao: d.duracao, chavesBola: d.chavesBola.map((k) => k.slice()), jogadores,
+    roteiro: true, aproximado: true, duracao: d.duracao, chavesBola: ordenar(d.chavesBola), jogadores,
   };
 }
 
