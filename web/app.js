@@ -656,6 +656,21 @@ function trocarRotulo(j, destaque) {
   }
 }
 
+function liberarObjeto(o) {
+  const compartilhadas = new Set([...Object.values(G), geoFicha]);
+  o.traverse((x) => {
+    if (x.isMesh && !compartilhadas.has(x.geometry)) x.geometry.dispose();
+    if (x.isMesh || x.isSprite) for (const m of [].concat(x.material)) { if (m.map && m.map !== _circulo) m.map.dispose(); m.dispose(); }
+  });
+}
+
+function liberarBonecos(l) {
+  for (const j of l.jogadores || []) {
+    for (const bo of Object.values(j.bonecos || {})) { cena.remove(bo.g); liberarObjeto(bo.g); }
+    j.bonecos = {}; j.boneco = null;
+  }
+}
+
 function mostrarBonecos(l, mostrar) {
   for (const j of l.jogadores) {
     for (const bo of Object.values(j.bonecos || {})) cena.remove(bo.g);
@@ -1027,6 +1042,12 @@ canvas.addEventListener('pointermove', (e) => {
 canvas.addEventListener('pointerup', (e) => {
   if (arrastando) { arrastando = null; recalcularDepoisDeEditar(); return; }
   if (!baixo || Math.hypot(e.clientX - baixo[0], e.clientY - baixo[1]) > 5) return;
+  if (estado.editor || estado.vista === 'tatica') {   // vista de cima: fichas são maiores que os bonecos, seleciona por proximidade
+    const p = pontoNoChao(e); if (!p) return;
+    const { j } = jogadorMaisPerto(p[0], p[1], 1.8);
+    if (j) estado.editor ? selecionarNoEditor(j) : selecionar(j);
+    return;
+  }
   const r = canvas.getBoundingClientRect();
   mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(mouse, camera);
@@ -1106,13 +1127,24 @@ function paraRoteiro(l) {
 
 function chavesDe(alvo) { return alvo === 'bola' ? estado.lance.chavesBola : alvo.chaves; }
 
-function moverChave(alvo, x, y) {
+// índice da chave no instante atual (tolerância de meio quadro), ou -1
+function chaveNoInstante(ks, t) {
+  let melhor = -1, md = 0.5 / FPS_ROTEIRO + 1e-3;
+  ks.forEach((k, i) => { const d = Math.abs(k[0] - t); if (d <= md) { md = d; melhor = i; } });
+  return melhor;
+}
+
+function chaveParaEditar(alvo) {
   const l = estado.lance, t = +(estado.t / l.fps).toFixed(3), ks = chavesDe(alvo);
-  let k = ks.find((c) => Math.abs(c[0] - t) < 0.12);
-  if (!k) {
-    const atual = alvo === 'bola' ? amostra(l.bola, estado.t) : amostra(alvo.pos, estado.t);
-    k = [t, ...atual]; ks.push(k); ks.sort((a, b) => a[0] - b[0]);
-  }
+  const i = chaveNoInstante(ks, t);
+  if (i >= 0) return ks[i];
+  const k = [t, ...(alvo === 'bola' ? amostra(l.bola, estado.t) : amostra(alvo.pos, estado.t))];
+  ks.push(k); ks.sort((a, b) => a[0] - b[0]);
+  return k;
+}
+
+function moverChave(alvo, x, y) {
+  const k = chaveParaEditar(alvo);
   k[1] = +x.toFixed(2); k[2] = +y.toFixed(2);
   reexpandir(alvo);
   marcarAlterado();
@@ -1130,6 +1162,8 @@ function recalcularDepoisDeEditar() {
   definirFinalizador(l);
   olhar = calcularOlhar(l, estado.sel, estado.olhar);
   ultimoT = -1;
+  $('#marca-gol').style.left = `calc(${(l.frameGol / (l.frames - 1)) * 100}% - 1px)`;
+  listarJogadores();
   atualizarEditor();
 }
 
@@ -1181,7 +1215,7 @@ function atualizarEditor() {
   if (!estado.editor) return;
   const l = estado.lance, alvo = estado.selEditor;
   $('#ed-alvo').textContent = alvo === 'bola' ? 'Bola' : nomeLongo(alvo);
-  const ks = chavesDe(alvo) || [];
+  const ks = (chavesDe(alvo) || []).filter((k) => k[0] <= l.duracao + 1e-6);
   $('#ed-chaves').textContent = `${ks.length} quadros-chave`;
   const ehBola = alvo === 'bola';
   $('#ed-altura-linha').hidden = !ehBola;
@@ -1194,15 +1228,15 @@ function atualizarEditor() {
 }
 
 function irParaChave(dir) {
-  const l = estado.lance, t = estado.t / l.fps, ks = chavesDe(estado.selEditor);
+  const l = estado.lance, t = estado.t / l.fps, ks = chavesDe(estado.selEditor).filter((k) => k[0] <= l.duracao + 1e-6);
   const alvo = dir > 0 ? ks.find((k) => k[0] > t + 0.01) : [...ks].reverse().find((k) => k[0] < t - 0.01);
-  if (alvo) { estado.t = alvo[0] * l.fps; atualizarEditor(); }
+  if (alvo) { estado.t = Math.min(alvo[0] * l.fps, l.frames - 1); atualizarEditor(); }
 }
 
 function apagarChave() {
   const l = estado.lance, t = estado.t / l.fps, ks = chavesDe(estado.selEditor);
   if (ks.length <= 1) return;
-  const i = ks.findIndex((k) => Math.abs(k[0] - t) < 0.12);
+  const i = chaveNoInstante(ks, t);
   if (i < 0) return;
   ks.splice(i, 1);
   reexpandir(estado.selEditor); marcarAlterado(); recalcularDepoisDeEditar();
@@ -1232,12 +1266,11 @@ $('#ed-ant').onclick = () => irParaChave(-1);
 $('#ed-prox').onclick = () => irParaChave(1);
 $('#ed-apagar').onclick = apagarChave;
 $('#ed-altura').oninput = (e) => {
-  const l = estado.lance, t = +(estado.t / l.fps).toFixed(3), ks = l.chavesBola;
-  let k = ks.find((c) => Math.abs(c[0] - t) < 0.12);
-  if (!k) { k = [t, ...amostra(l.bola, estado.t)]; ks.push(k); ks.sort((a, b) => a[0] - b[0]); }
+  const k = chaveParaEditar('bola');
   k[3] = +(+e.target.value).toFixed(2);
-  reexpandir('bola'); marcarAlterado(); atualizarEditor();
+  reexpandir('bola'); marcarAlterado();
 };
+$('#ed-altura').onchange = () => recalcularDepoisDeEditar();   // olhar e finalizador dependem da bola
 $('#ed-duracao').onchange = (e) => {
   const l = estado.lance, d = limita(parseFloat(String(e.target.value).replace(',', '.')) || l.duracao, 2, 60);
   l.duracao = d; expandirRoteiro(l); recalcularDepoisDeEditar(); marcarAlterado();
@@ -1247,34 +1280,99 @@ $('#ed-duracao').onchange = (e) => {
 $('#ed-exportar').onclick = () => baixarArquivo(`${estado.lance.id}.json`, JSON.stringify(exportarRoteiro(estado.lance), null, 1));
 $('#ed-importar').onclick = () => $('#arquivo-importar').click();
 $('#arquivo-importar').onchange = async (e) => {
-  const f = e.target.files[0]; if (!f) return;
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  let l;
   try {
-    const l = JSON.parse(await f.text());
-    if (!l.roteiro || !Array.isArray(l.jogadores) || !Array.isArray(l.chavesBola)) throw new Error('não é um roteiro do Lance POV');
-    l.grupo = l.grupo || 'meus';
-    const i = estado.lances.findIndex((x) => x.id === l.id);
-    if (i >= 0) estado.lances[i] = l; else estado.lances.push(l);
-    preencherLances(); $('#sel-lance').value = estado.lances.indexOf(l);
-    carregarLance(l);
-  } catch (err) { alert(`Não consegui importar: ${err.message}`); }
-  e.target.value = '';
+    if (f.size > 5e6) throw new Error('arquivo grande demais');
+    l = validarRoteiro(JSON.parse(await f.text()));   // nada do estado muda antes de validar
+  } catch (err) { alert(`Não consegui importar: ${err.message}`); return; }
+  const i = estado.lances.findIndex((x) => x.id === l.id);
+  if (i >= 0) {   // substitui um lance existente, mantendo grupo e ordem
+    const antigo = estado.lances[i];
+    l.grupo = antigo.grupo; l.ordem = antigo.ordem;
+    if (antigo === estado.lance) estado.lance = null;
+    liberarBonecos(antigo);
+    estado.lances[i] = l;
+  } else {
+    l.grupo = 'meus'; delete l.ordem;
+    estado.lances.push(l);
+    salvarMeus([...lerMeus(), l.id]);
+  }
+  try { localStorage.setItem(`lancepov:rascunho:${l.id}`, JSON.stringify(l)); } catch { /* sem armazenamento */ }
+  preencherLances(); $('#sel-lance').value = estado.lances.indexOf(l);
+  carregarLance(l, true);
+  $('#ed-status').textContent = 'Lance importado e salvo neste navegador.';
 };
 $('#ed-descartar').onclick = () => {
-  const l = estado.lance;
+  const l = estado.lance, i = estado.lances.indexOf(l);
+  if (l.grupo === 'meus') {
+    if (!confirm('Apagar este lance? Exporte o JSON antes se quiser guardar.')) return;
+    try { localStorage.removeItem(`lancepov:rascunho:${l.id}`); } catch { /* sem armazenamento */ }
+    salvarMeus(lerMeus().filter((id) => id !== l.id));
+    estado.lances.splice(i, 1); estado.lance = null; liberarBonecos(l);
+    preencherLances();
+    const prox = estado.lances.find((x) => x.grupo === 'hypados') || estado.lances[0];
+    $('#sel-lance').value = estado.lances.indexOf(prox); carregarLance(prox);
+    return;
+  }
   try { localStorage.removeItem(`lancepov:rascunho:${l.id}`); } catch { /* sem armazenamento */ }
   const original = estado.originais[l.id];
   if (original) {
-    const copia = JSON.parse(original); const i = estado.lances.indexOf(l);
-    estado.lances[i] = copia; mostrarBonecos(l, false); estado.lance = null; carregarLance(copia, true);
+    const copia = JSON.parse(original);
+    estado.lances[i] = copia; estado.lance = null; liberarBonecos(l);
+    carregarLance(copia, true);
     if (estado.editor) alternarEditor(true);
   }
   $('#ed-status').textContent = 'Rascunho descartado.';
 };
 $('#ed-novo').onclick = () => {
   const l = lanceEmBranco();
-  estado.lances.push(l); preencherLances(); $('#sel-lance').value = estado.lances.indexOf(l);
+  estado.lances.push(l); salvarMeus([...lerMeus(), l.id]);
+  preencherLances(); $('#sel-lance').value = estado.lances.indexOf(l);
   carregarLance(l); alternarEditor(true);
+  marcarAlterado();   // já fica salvo, mesmo sem nenhuma edição
 };
+
+function lerMeus() {
+  try { const v = JSON.parse(localStorage.getItem('lancepov:meus') || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; }
+  catch { return []; }
+}
+function salvarMeus(ids) { try { localStorage.setItem('lancepov:meus', JSON.stringify([...new Set(ids)])); } catch { /* sem armazenamento */ } }
+
+// Valida um roteiro vindo de arquivo ou do localStorage e devolve uma cópia só com campos conhecidos.
+function validarRoteiro(d) {
+  const num = (v) => typeof v === 'number' && Number.isFinite(v);
+  const texto = (v, max) => v == null || (typeof v === 'string' && v.length <= max);
+  const chaveOk = (k, n) => Array.isArray(k) && k.length === n && k.every(num) && k[0] >= 0 && k[0] <= 120
+    && Math.abs(k[1]) <= 80 && Math.abs(k[2]) <= 60 && (n < 4 || (k[3] >= 0 && k[3] <= 40));
+  const lista = (v, n, max) => Array.isArray(v) && v.length >= 1 && v.length <= max && v.every((k) => chaveOk(k, n));
+  if (!d || typeof d !== 'object' || d.roteiro !== true) throw new Error('não é um roteiro do Lance POV');
+  if (typeof d.id !== 'string' || !/^[\w-]{1,80}$/.test(d.id)) throw new Error('id inválido');
+  if (!num(d.duracao) || d.duracao < 1 || d.duracao > 120) throw new Error('duração inválida');
+  if (!lista(d.chavesBola, 4, 5000)) throw new Error('chaves da bola inválidas');
+  if (!Array.isArray(d.jogadores) || d.jogadores.length < 1 || d.jogadores.length > 40) throw new Error('lista de jogadores inválida');
+  for (const c of ['titulo', 'subtitulo', 'contexto', 'fonte']) if (!texto(d[c], 400)) throw new Error(`campo ${c} inválido`);
+  const ids = new Set();
+  const jogadores = d.jogadores.map((j, n) => {
+    if (!j || typeof j !== 'object') throw new Error(`jogador ${n + 1} inválido`);
+    const id = typeof j.id === 'number' ? String(j.id) : j.id;
+    if (typeof id !== 'string' || !id || id.length > 60 || ids.has(id)) throw new Error(`id do jogador ${n + 1} inválido ou repetido`);
+    ids.add(id);
+    if (j.time !== 'attack' && j.time !== 'defense') throw new Error(`time do jogador ${n + 1} inválido`);
+    if (!texto(j.nome, 60) || !texto(j.cor, 30) || !texto(j.borda, 30)) throw new Error(`textos do jogador ${n + 1} inválidos`);
+    if (j.numero != null && !(Number.isInteger(j.numero) && j.numero >= 0 && j.numero <= 999)) throw new Error(`número do jogador ${n + 1} inválido`);
+    if (!lista(j.chaves, 3, 5000)) throw new Error(`chaves do jogador ${n + 1} inválidas`);
+    return { id, time: j.time, numero: j.numero ?? null, nome: j.nome ?? null, cor: j.cor ?? null, borda: j.borda ?? null, chaves: j.chaves.map((k) => k.slice()), estimado: !!j.estimado };
+  });
+  const times = d.times && typeof d.times === 'object' && texto(d.times.attack, 60) && texto(d.times.defense, 60)
+    ? { attack: d.times.attack, defense: d.times.defense } : undefined;
+  const fin = d.finalizadorId != null && ids.has(String(d.finalizadorId)) ? String(d.finalizadorId) : undefined;
+  return {
+    id: d.id, titulo: d.titulo || d.id, subtitulo: d.subtitulo, contexto: d.contexto, fonte: d.fonte, times, finalizadorId: fin,
+    grupo: ['hypados', 'brasil', 'meus', 'extras'].includes(d.grupo) ? d.grupo : 'meus', ordem: Number.isInteger(d.ordem) ? d.ordem : undefined,
+    roteiro: true, aproximado: true, duracao: d.duracao, chavesBola: d.chavesBola.map((k) => k.slice()), jogadores,
+  };
+}
 
 // ---------------------------------------------------------------- interface
 const GRUPOS = [
@@ -1284,29 +1382,42 @@ const GRUPOS = [
   ['extras', 'Mais lances (Liverpool 2019)'],
 ];
 
+function el(tag, props = {}, filhos = []) {
+  const e = Object.assign(document.createElement(tag), props);
+  for (const f of filhos) e.append(f);
+  return e;
+}
+
 function preencherLances() {
   const sel = $('#sel-lance');
   const ordenados = (g) => estado.lances.map((l, i) => [l, i]).filter(([l]) => (l.grupo || 'extras') === g).sort((a, b) => (a[0].ordem ?? 999) - (b[0].ordem ?? 999));
-  sel.innerHTML = GRUPOS.map(([g, rotulo]) => {
+  sel.replaceChildren(...GRUPOS.map(([g, rotulo]) => {
     const itens = ordenados(g);
-    if (!itens.length) return '';
-    return `<optgroup label="${rotulo}">${itens.map(([l, i]) => `<option value="${i}">${l.ordem && g !== 'extras' ? `${l.ordem}. ` : ''}${l.titulo}</option>`).join('')}</optgroup>`;
-  }).join('');
+    if (!itens.length) return null;
+    return el('optgroup', { label: rotulo }, itens.map(([l, i]) => el('option', { value: String(i), textContent: `${l.ordem && g !== 'extras' && g !== 'meus' ? `${l.ordem}. ` : ''}${l.titulo || l.id}` })));
+  }).filter(Boolean));
   sel.onchange = () => { if (!estado.gravando) carregarLance(estado.lances[+sel.value]); };
 }
 
 function carregarLance(l, ignorarRascunho) {
-  if (estado.lance) mostrarBonecos(estado.lance, false);
+  if (estado.lance && estado.lance !== l) liberarBonecos(estado.lance);   // libera GPU do lance anterior; recria ao voltar
+  else if (estado.lance) mostrarBonecos(estado.lance, false);
   limparFichas();
   if (!estado.originais[l.id]) estado.originais[l.id] = JSON.stringify(l);
   let rascunho = false;
   if (!ignorarRascunho && !l.preparado) {
-    try {
-      const r = localStorage.getItem(`lancepov:rascunho:${l.id}`);
-      if (r) { const d = JSON.parse(r); Object.assign(l, d); delete l.bola; l.jogadores = d.jogadores; rascunho = true; }
-    } catch { /* sem armazenamento ou rascunho inválido */ }
+    let d = null;
+    try { const r = localStorage.getItem(`lancepov:rascunho:${l.id}`); if (r) d = validarRoteiro(JSON.parse(r)); }
+    catch { try { localStorage.removeItem(`lancepov:rascunho:${l.id}`); } catch { /* sem armazenamento */ } }   // rascunho inválido: descarta
+    if (d) {
+      const grupo = l.grupo, ordem = l.ordem;
+      for (const k of Object.keys(l)) delete l[k];
+      Object.assign(l, d, { grupo: grupo || d.grupo, ordem: ordem ?? d.ordem });
+      rascunho = true;
+    }
   }
   if (!l.preparado) { prepararLance(l); l.preparado = true; }
+  if (estado.editor) paraRoteiro(l);
   estado.lance = l; estado.t = 0; ultimoT = -1;
   mostrarBonecos(l, true);
   const dur = (l.frames - 1) / l.fps;
@@ -1321,10 +1432,12 @@ function carregarLance(l, ignorarRascunho) {
   $('#fonte-lance').textContent = l.fonte ? `Fonte: ${l.fonte}` : '';
   $('#rng-tempo').max = l.frames - 1;
   $('#marca-gol').style.left = `calc(${(l.frameGol / (l.frames - 1)) * 100}% - 1px)`;
+  estado.selEditor = null;
   selecionar(l.finalizador, true);
   estado.tocando = !estado.editor; atualizarPlay();
   if (estado.vista === 'drone') posicionarDrone();
-  if (estado.editor) { paraRoteiro(l); selecionarNoEditor(estado.sel); }
+  if (estado.editor) selecionarNoEditor(estado.sel);
+  $('#ed-descartar').textContent = l.grupo === 'meus' ? 'Apagar este lance' : 'Descartar rascunho';
   try { localStorage.setItem('lancepov:lance', l.id); } catch { /* sem armazenamento */ }
 }
 
@@ -1333,16 +1446,19 @@ function listarJogadores() {
   const grupos = ['attack', 'defense'].map((time) => {
     const js = l.jogadores.filter((j) => j.time === time)
       .sort((a, b) => (b.nome ? 1 : 0) - (a.nome ? 1 : 0) || (a.numero ?? 99) - (b.numero ?? 99));
-    if (!js.length) return '';
-    return `<div class="grupo">${js[0].nomeTime}</div>` + js.map((j) => {
-      const i = l.jogadores.indexOf(j);
-      return `<button data-i="${i}" class="${j === estado.sel ? 'ativo' : ''}">
-        <span class="camisa" style="background:${corCss(j.cor, '#888')};border-color:${corCss(j.borda, '#fff')};color:${corCss(j.borda, '#fff')}">${j.numero ?? ''}</span>
-        ${nomeLongo(j)}${j.estimado ? '<span class="est" title="Movimento estimado: o dado só tem a posição dele no chute">estimado</span>' : ''}${j === l.finalizador ? '<span class="gol">gol</span>' : ''}</button>`;
-    }).join('');
+    if (!js.length) return [];
+    return [el('div', { className: 'grupo', textContent: js[0].nomeTime }), ...js.map((j) => {
+      const camisa = el('span', { className: 'camisa', textContent: j.numero ?? '' });
+      Object.assign(camisa.style, { background: corCss(j.cor, '#888'), borderColor: corCss(j.borda, '#fff'), color: corCss(j.borda, '#fff') });
+      const filhos = [camisa, nomeLongo(j)];
+      if (j.estimado) filhos.push(el('span', { className: 'est', title: 'Movimento estimado: o dado só tem a posição dele no chute', textContent: 'estimado' }));
+      if (j === l.finalizador) filhos.push(el('span', { className: 'gol', textContent: 'gol' }));
+      const b = el('button', { className: j === estado.sel ? 'ativo' : '' }, filhos);
+      b.onclick = () => { if (estado.editor) selecionarNoEditor(j); else selecionar(j); };
+      return b;
+    })];
   });
-  caixa.innerHTML = grupos.join('');
-  caixa.querySelectorAll('button').forEach((b) => (b.onclick = () => { const j = l.jogadores[+b.dataset.i]; if (estado.editor) selecionarNoEditor(j); else selecionar(j); }));
+  caixa.replaceChildren(...grupos.flat());
 }
 
 function selecionar(j, silencioso) {
@@ -1489,6 +1605,11 @@ Promise.all([carregarJson('data/hypados.json'), carregarJson('data/brasil.json')
       ids.add(l.id);
       if (!l.grupo) l.grupo = hypados.includes(l) ? 'hypados' : brasil.includes(l) ? 'brasil' : 'extras';
       estado.lances.push(l);
+    }
+    for (const id of lerMeus()) {   // lances criados ou importados neste navegador
+      if (ids.has(id)) continue;
+      try { const l = validarRoteiro(JSON.parse(localStorage.getItem(`lancepov:rascunho:${id}`))); l.grupo = 'meus'; ids.add(id); estado.lances.push(l); }
+      catch { /* rascunho ausente ou inválido */ }
     }
     if (!estado.lances.length) throw new Error('nenhum lance encontrado');
     preencherLances();
